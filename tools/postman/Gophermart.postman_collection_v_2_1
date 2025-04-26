@@ -1,0 +1,487 @@
+{
+	"info": {
+		"_postman_id": "824e4bfb-327c-4817-81b7-a7901ae62be8",
+		"name": "Gophermart",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37169940"
+	},
+	"item": [
+		{
+			"name": "Accrual",
+			"item": []
+		},
+		{
+			"name": "Gophermart",
+			"item": [
+				{
+					"name": "Register 200",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"new_login\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/register",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register 400 empty model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/register",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register 400 uncorrect model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"aaa\": \"aaa\",\r\n    \"bbb\": \"bbb\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/register",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register 409",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"login\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/register",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register 500",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"new_login\",\r\n    \"password\": \"no_password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/register",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login 200",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"login\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login 400 empty model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login 400 uncorrect model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"aaa\": \"aaa\",\r\n    \"bbb\": \"bbb\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login 401",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"new_login\",\r\n    \"password\": \"no_password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login 500",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"error\",\r\n    \"password\": \"error\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Balance 200",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/balance",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Balance Withdraw 200",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\": \"000001\",\r\n    \"sum\": 12.5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/balance/withdraw",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"balance",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Balance Withdraw 402",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\": \"000001\",\r\n    \"sum\": 52.5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/balance/withdraw",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"balance",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Balance Withdraw 422",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\": \"000000\",\r\n    \"sum\": 12.5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/balance/withdraw",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"balance",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdrawals 200",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/withdrawals",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"withdrawals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login 200 Empty User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"empty\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdrawals 204",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/withdrawals",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"withdrawals"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "RUN_ADDRESS_GOPHERMART",
+			"value": "localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "RUN_ADDRESS_ACCRUAL",
+			"value": "localhost:8081",
+			"type": "string"
+		}
+	]
+}

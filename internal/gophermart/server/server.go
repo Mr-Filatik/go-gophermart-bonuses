@@ -103,11 +103,6 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Expires:  time.Now().Add(24 * time.Hour),
 	})
-
-	// 200 — пользователь успешно зарегистрирован и аутентифицирован;
-	// 400 — неверный формат запроса;
-	// 409 — логин уже занят;
-	// 500 — внутренняя ошибка сервера.
 }
 
 func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
@@ -152,11 +147,6 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Expires:  time.Now().Add(24 * time.Hour),
 	})
-
-	// 200 — пользователь успешно аутентифицирован;
-	// 400 — неверный формат запроса;
-	// 401 — неверная пара логин/пароль;
-	// 500 — внутренняя ошибка сервера.
 }
 
 func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
@@ -197,7 +187,7 @@ func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	balance, err := s.service.UserBalance(login)
+	balance, err := s.service.UserBalanceGet(login)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -208,10 +198,6 @@ func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, serr.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// 200 — успешная обработка запроса.
-	// 401 — пользователь не авторизован.
-	// 500 — внутренняя ошибка сервера.
 }
 
 func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
@@ -246,12 +232,6 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	// 200 — успешная обработка запроса;
-	// 401 — пользователь не авторизован;
-	// 402 — на счету недостаточно средств;
-	// 422 — неверный номер заказа;
-	// 500 — внутренняя ошибка сервера.
 }
 
 func (s *Server) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
@@ -268,7 +248,7 @@ func (s *Server) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	withdrawals, err := s.service.UserWithdrawals(login)
+	withdrawals, err := s.service.UserWithdrawalsGet(login)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -284,9 +264,4 @@ func (s *Server) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, serr.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// 200 — успешная обработка запроса;
-	// 204 — нет ни одного списания.
-	// 401 — пользователь не авторизован.
-	// 500 — внутренняя ошибка сервера.
 }

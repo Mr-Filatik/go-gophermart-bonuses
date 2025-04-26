@@ -58,7 +58,7 @@ func (s *Service) UserLogin(data models.UserLoginRequest) error {
 	return nil
 }
 
-func (s *Service) UserBalance(login string) (models.UserBalanceResponse, error) {
+func (s *Service) UserBalanceGet(login string) (models.UserBalanceResponse, error) {
 	s.log.Info(
 		"User balance",
 	)
@@ -82,7 +82,7 @@ func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest) er
 	return nil
 }
 
-func (s *Service) UserWithdrawals(login string) ([]models.UserWithdraw, error) {
+func (s *Service) UserWithdrawalsGet(login string) ([]models.UserWithdraw, error) {
 	if login == "empty" {
 		return make([]models.UserWithdraw, 0), nil
 	}
