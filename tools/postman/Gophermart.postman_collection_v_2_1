@@ -8,7 +8,208 @@
 	"item": [
 		{
 			"name": "Accrual",
-			"item": []
+			"item": [
+				{
+					"name": "Order 200",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/orders/000101",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"000101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order 204",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/orders/000000",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"000000"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order 202",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\": \"000001\",\r\n    \"goods\": [\r\n        {\r\n            \"description\": \"Чайник Bork\",\r\n            \"price\": 7000\r\n        }\r\n    ]\r\n} ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/orders",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order 400",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\": \"\",\r\n    \"goods\": [\r\n        {\r\n            \"description\": \"Чайник Bork\",\r\n            \"price\": 7000\r\n        }\r\n    ]\r\n} ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/orders",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order 409",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\": \"000000\",\r\n    \"goods\": [\r\n        {\r\n            \"description\": \"Чайник Bork\",\r\n            \"price\": 7000\r\n        }\r\n    ]\r\n} ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/orders",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Good 200",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"match\": \"Bork\",\r\n    \"reward\": 10,\r\n    \"reward_type\": \"%\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/goods",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"goods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Good 400",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"match\": \"Daddy\",\r\n    \"reward\": 10,\r\n    \"reward_type\": \"asa\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/goods",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"goods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Good 409",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"match\": \"exists\",\r\n    \"reward\": 10,\r\n    \"reward_type\": \"%\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_ACCRUAL}}/api/goods",
+							"host": [
+								"{{RUN_ADDRESS_ACCRUAL}}"
+							],
+							"path": [
+								"api",
+								"goods"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "Gophermart",
