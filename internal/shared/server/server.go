@@ -65,6 +65,19 @@ func GetDataFromBody[Tout any](r *http.Request) (*Tout, error) {
 	return data, nil
 }
 
+func SetDataToBodyInJSON(w http.ResponseWriter, data any) error {
+	jdata, err := json.Marshal(data)
+	if err != nil {
+		return errors.New(err.Error())
+	}
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jdata)
+	if err != nil {
+		return errors.New(err.Error())
+	}
+	return nil
+}
+
 func CreateToken(login string) (string, error) {
 	secretKey := []byte("FILATIK_SECRET_KEY_FOR_TOKEN")
 
