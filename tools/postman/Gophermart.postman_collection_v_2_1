@@ -42,7 +42,7 @@
 					"response": []
 				},
 				{
-					"name": "Register 400 empty model",
+					"name": "Register 400 Empty Model",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -61,7 +61,7 @@
 					"response": []
 				},
 				{
-					"name": "Register 400 uncorrect model",
+					"name": "Register 400 Uncorrect Model",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -145,7 +145,7 @@
 					"response": []
 				},
 				{
-					"name": "Login 200",
+					"name": "Login 200 Main User",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -173,7 +173,35 @@
 					"response": []
 				},
 				{
-					"name": "Login 400 empty model",
+					"name": "Login 200 Empty User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\": \"empty\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login 400 Empty Model",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -192,7 +220,7 @@
 					"response": []
 				},
 				{
-					"name": "Login 400 uncorrect model",
+					"name": "Login 400 Uncorrect Model",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -270,6 +298,203 @@
 								"api",
 								"user",
 								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 200",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 204",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 200",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "000001",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 202",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "000000",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 400",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 409",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "000002",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 422",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "000RG02",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders 500",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "000003",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/orders",
+							"host": [
+								"{{RUN_ADDRESS_GOPHERMART}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"orders"
 							]
 						}
 					},
@@ -395,34 +620,6 @@
 								"api",
 								"user",
 								"withdrawals"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login 200 Empty User",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"login\": \"empty\",\r\n    \"password\": \"password\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{RUN_ADDRESS_GOPHERMART}}/api/user/login",
-							"host": [
-								"{{RUN_ADDRESS_GOPHERMART}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"login"
 							]
 						}
 					},

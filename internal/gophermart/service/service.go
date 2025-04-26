@@ -13,6 +13,8 @@ var (
 	ErrInvalidLoginOrPassword = errors.New("invalid login/password pair")
 	ErrInvalidOrderNumber     = errors.New("invalid order number")
 	ErrInsufficientFunds      = errors.New("insufficient funds")
+	ErrAlreadyUploadThisUser  = errors.New("already upload this user")
+	ErrAlreadyUploadOtherUser = errors.New("already upload other user")
 )
 
 type Service struct {
@@ -56,6 +58,40 @@ func (s *Service) UserLogin(data models.UserLoginRequest) error {
 		"User login",
 	)
 	return nil
+}
+
+func (s *Service) UserOrdersGet(login string) ([]models.UserOrder, error) {
+	if login == "empty" {
+		return make([]models.UserOrder, 0), nil
+	}
+
+	s.log.Info(
+		"Get orders",
+	)
+
+	parsedTime, err := time.Parse(time.RFC3339, "2023-10-01T12:00:00Z")
+	if err != nil {
+		return make([]models.UserOrder, 0), errors.New(err.Error())
+	}
+
+	orders := []models.UserOrder{
+		{Number: "12345", Status: models.UserOrderStatusNew, UploadedAt: parsedTime},
+		{Number: "67890", Status: models.UserOrderStatusProcessed, Accrual: 50.25, UploadedAt: parsedTime},
+	}
+	return orders, nil
+}
+
+func (s *Service) UserOrdersCreate(login string, number string) error {
+	if login == "login" && number == "000001" {
+		return ErrAlreadyUploadThisUser
+	}
+	if login == "login" && number == "000002" {
+		return ErrAlreadyUploadOtherUser
+	}
+	if number == "000000" {
+		return nil
+	}
+	return errors.New("tun tun tun tun saur")
 }
 
 func (s *Service) UserBalanceGet(login string) (models.UserBalanceResponse, error) {

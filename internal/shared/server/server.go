@@ -50,7 +50,17 @@ var (
 	ErrInternalServerError  = errors.New("internal server error")
 )
 
-func GetDataFromBody[Tout any](r *http.Request) (*Tout, error) {
+func GetStringFromBody(r *http.Request) (string, error) {
+	var buf bytes.Buffer
+
+	if _, err := buf.ReadFrom(r.Body); err != nil {
+		return "", ErrInvalidRequestFormat
+	}
+
+	return buf.String(), nil
+}
+
+func GetDataFromBodyInJSON[Tout any](r *http.Request) (*Tout, error) {
 	data := new(Tout)
 	var buf bytes.Buffer
 

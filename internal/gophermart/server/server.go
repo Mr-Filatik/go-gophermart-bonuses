@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/middleware"
@@ -67,7 +68,7 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := server.GetDataFromBody[models.UserRegisterRequest](r)
+	data, err := server.GetDataFromBodyInJSON[models.UserRegisterRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -111,7 +112,7 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := server.GetDataFromBody[models.UserLoginRequest](r)
+	data, err := server.GetDataFromBodyInJSON[models.UserLoginRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -155,22 +156,65 @@ func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.log.Info("tun tun tun tun tun saur")
+	ctx := r.Context()
+	login, ok := ctx.Value("login").(string)
+	if !ok || login == "" {
+		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
+		s.log.Error("Login not found in context", errors.New("not login in token"))
+		return
+	}
 
-	// POST
-	// 200 — номер заказа уже был загружен этим пользователем;
-	// 202 — новый номер заказа принят в обработку;
-	// 400 — неверный формат запроса;
-	// 401 — пользователь не аутентифицирован;
-	// 409 — номер заказа уже был загружен другим пользователем;
-	// 422 — неверный формат номера заказа;
-	// 500 — внутренняя ошибка сервера.
+	if r.Method == http.MethodGet {
+		orders, err := s.service.UserOrdersGet(login)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	// GET
-	// 200 — успешная обработка запроса.
-	// 204 — нет данных для ответа.
-	// 401 — пользователь не авторизован.
-	// 500 — внутренняя ошибка сервера.
+		if len(orders) == 0 {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		serr := server.SetDataToBodyInJSON(w, orders)
+		if serr != nil {
+			http.Error(w, serr.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if r.Method == http.MethodPost {
+		data, err := server.GetStringFromBody(r)
+		if err != nil {
+			s.log.Error("Error get data from body", err)
+			http.Error(w, err.Error(), http.StatusBadRequest) // dont used
+			return
+		}
+
+		s.log.Info("Data", "data", data)
+		ok, _ := regexp.MatchString(`^\d+$`, data)
+		if !ok {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			return
+		}
+
+		cerr := s.service.UserOrdersCreate(login, data)
+		if cerr != nil {
+			s.log.Error("Error create order", cerr)
+			if errors.Is(cerr, service.ErrAlreadyUploadThisUser) {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			if errors.Is(cerr, service.ErrAlreadyUploadOtherUser) {
+				http.Error(w, cerr.Error(), http.StatusConflict)
+				return
+			}
+			http.Error(w, cerr.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+	}
 }
 
 func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
@@ -206,7 +250,7 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := server.GetDataFromBody[models.UserBalanceWithdrawRequest](r)
+	data, err := server.GetDataFromBodyInJSON[models.UserBalanceWithdrawRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
