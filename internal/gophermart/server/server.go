@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/service"
@@ -64,7 +65,12 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.service.UserRegister(data)
+	if data != nil && (data.Login == "" || data.Password == "") {
+		http.Error(w, "data is empty", http.StatusBadRequest)
+		return
+	}
+
+	err = s.service.UserRegister(*data)
 	if err != nil {
 		s.log.Error("Error register user", err)
 		if errors.Is(err, service.ErrLoginAlreadyTaken) {
@@ -75,6 +81,19 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	token, terr := server.CreateToken(data.Login)
+	if terr != nil {
+		http.Error(w, terr.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Path:     "/api/user",
+		HttpOnly: true,
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
 
 	// 200 — пользователь успешно зарегистрирован и аутентифицирован;
 	// 400 — неверный формат запроса;
@@ -91,16 +110,39 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 	data, err := server.GetDataFromBody[models.UserLoginRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	token, err := s.service.UserLogin(data)
-	if err != nil {
-		s.log.Error("Error login user", err)
+	if data != nil && (data.Login == "" || data.Password == "") {
+		http.Error(w, "data is empty", http.StatusBadRequest)
+		return
 	}
 
-	token = "Bearer" + token
+	lerr := s.service.UserLogin(*data)
+	if lerr != nil {
+		s.log.Error("Error login user", lerr)
+		if errors.Is(lerr, service.ErrInvalidLoginOrPassword) {
+			http.Error(w, lerr.Error(), http.StatusUnauthorized)
+			return
+		} else {
+			http.Error(w, lerr.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 
-	// return token
+	token, terr := server.CreateToken(data.Login)
+	if terr != nil {
+		http.Error(w, terr.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Path:     "/api/user",
+		HttpOnly: true,
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
 
 	// 200 — пользователь успешно аутентифицирован;
 	// 400 — неверный формат запроса;

@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	ErrLoginAlreadyTaken = errors.New("login already taken")
+	ErrLoginAlreadyTaken      = errors.New("login already taken")
+	ErrInvalidLoginOrPassword = errors.New("invalid login/password pair")
 )
 
 type Service struct {
@@ -39,9 +40,17 @@ func (s *Service) UserRegister(data models.UserRegisterRequest) error {
 	return nil
 }
 
-func (s *Service) UserLogin(data models.UserLoginRequest) (string, error) {
+func (s *Service) UserLogin(data models.UserLoginRequest) error {
+	if data.Login == "error" && data.Password == "error" {
+		return errors.New("aaa bbb ccc")
+	}
+
+	if data.Login != "login" || data.Password != "password" {
+		return ErrInvalidLoginOrPassword
+	}
+
 	s.log.Info(
 		"User login",
 	)
-	return "token", nil
+	return nil
 }

@@ -16,7 +16,7 @@ const (
 
 	// Default Values
 	defaultValueRunAddress     string = "localhost:8080"
-	defaultValueDatabaseUri    string = "..."
+	defaultValueDatabaseUri    string = "postgres://user:password@host:port/database"
 	defaultValueAccuralAddress string = "localhost:8081"
 )
 
