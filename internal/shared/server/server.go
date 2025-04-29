@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,23 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func ValidateRequestMethod(w http.ResponseWriter, log logger.Logger, current string, allowed string) bool {
-	if current == allowed {
-		return true
-	}
-
-	log.Error(
-		"Invalid request method",
-		errors.New("invalid request method"),
-		"actual", current,
-		"allowed", allowed,
-	)
-
-	http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-	return false
-}
-
-func ValidateRequestMethods(w http.ResponseWriter, log logger.Logger, current string, allowed ...string) bool {
+func ValidateRequestMethod(w http.ResponseWriter, log logger.Logger, current string, allowed ...string) bool {
 	for _, method := range allowed {
 		if current == method {
 			return true
@@ -41,7 +26,8 @@ func ValidateRequestMethods(w http.ResponseWriter, log logger.Logger, current st
 		"allowed", allowed,
 	)
 
-	http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	errorMessage := fmt.Sprintf("Invalid request method. Expected one of: %v.", allowed)
+	http.Error(w, errorMessage, http.StatusMethodNotAllowed)
 	return false
 }
 

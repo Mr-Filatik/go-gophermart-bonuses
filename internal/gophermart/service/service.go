@@ -4,7 +4,11 @@ import (
 	"errors"
 	"time"
 
+	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository"
+	userRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/user"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 )
 
@@ -18,12 +22,14 @@ var (
 )
 
 type Service struct {
-	log logger.Logger
+	userRep *userRepository.UserRepository
+	log     logger.Logger
 }
 
-func New(log logger.Logger) *Service {
+func New(userRep *userRepository.UserRepository, log logger.Logger) *Service {
 	srv := Service{
-		log: log,
+		userRep: userRep,
+		log:     log,
 	}
 
 	log.Info("Service created")
@@ -32,31 +38,41 @@ func New(log logger.Logger) *Service {
 }
 
 func (s *Service) UserRegister(data models.UserRegisterRequest) error {
-	if data.Login == "login" {
-		return ErrLoginAlreadyTaken
-	}
-	if data.Password != "password" {
-		return errors.New("tun tun tun tun tun saur")
+	hashedPassword, passErr := helper.GeneratePasswordHash(data.Password)
+	if passErr != nil {
+		return errors.New(passErr.Error())
 	}
 
-	s.log.Info(
-		"User register",
-	)
+	user := dbModels.User{
+		Login:        data.Login,
+		PasswordHash: string(hashedPassword),
+	}
+
+	err := s.userRep.Create(&user)
+	if err != nil {
+		if errors.Is(err, repository.ErrEntityAlreadyExists) {
+			return ErrLoginAlreadyTaken
+		}
+		return errors.New(err.Error())
+	}
+
 	return nil
 }
 
 func (s *Service) UserLogin(data models.UserLoginRequest) error {
-	if data.Login == "error" && data.Password == "error" {
-		return errors.New("tun tun tun tun tun saur")
+	user, err := s.userRep.GetByLogin(data.Login)
+	if err != nil {
+		if errors.Is(err, repository.ErrEntityNotFound) {
+			return ErrInvalidLoginOrPassword
+		}
+		return errors.New(err.Error())
 	}
 
-	if data.Password != "password" {
+	ok := helper.ComparePasswordHashes(user.PasswordHash, data.Password)
+	if !ok {
 		return ErrInvalidLoginOrPassword
 	}
 
-	s.log.Info(
-		"User login",
-	)
 	return nil
 }
 

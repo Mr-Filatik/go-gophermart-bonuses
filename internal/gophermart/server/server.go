@@ -71,12 +71,12 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 	data, err := server.GetDataFromBodyInJSON[models.UserRegisterRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if data != nil && (data.Login == "" || data.Password == "") {
-		http.Error(w, "data is empty", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -84,17 +84,17 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.log.Error("Error register user", err)
 		if errors.Is(err, service.ErrLoginAlreadyTaken) {
-			http.Error(w, err.Error(), http.StatusConflict)
+			w.WriteHeader(http.StatusConflict)
 			return
 		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
 
 	token, terr := server.CreateToken(data.Login)
 	if terr != nil {
-		http.Error(w, terr.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -115,12 +115,13 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 	data, err := server.GetDataFromBodyInJSON[models.UserLoginRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if data != nil && (data.Login == "" || data.Password == "") {
-		http.Error(w, "data is empty", http.StatusBadRequest)
+		s.log.Error("Data from body is empty", errors.New("body is empty"))
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -128,17 +129,18 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 	if lerr != nil {
 		s.log.Error("Error login user", lerr)
 		if errors.Is(lerr, service.ErrInvalidLoginOrPassword) {
-			http.Error(w, lerr.Error(), http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		} else {
-			http.Error(w, lerr.Error(), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
 
 	token, terr := server.CreateToken(data.Login)
 	if terr != nil {
-		http.Error(w, terr.Error(), http.StatusInternalServerError)
+		s.log.Error("Create token error", terr)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -151,7 +153,7 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethods(w, s.log, r.Method, http.MethodPost, http.MethodGet)
+	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodPost, http.MethodGet)
 	if !ok {
 		return
 	}
