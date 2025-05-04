@@ -4,7 +4,9 @@ import (
 	"errors"
 	"time"
 
+	migrations_root "github.com/Mr-Filatik/go-gophermart-bonuses"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
+	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -41,6 +43,22 @@ func (c *Connector) Connect(dbURI string) error {
 
 	c.db = db
 	c.log.Info("Database is connected")
+
+	return nil
+}
+
+func (c *Connector) ApplyMigrations() error {
+	sqlDB, _ := c.db.DB()
+
+	goose.SetBaseFS(migrations_root.EmbedMigrations)
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		return errors.New(err.Error())
+	}
+
+	if err := goose.Up(sqlDB, migrations_root.DirMigrations); err != nil {
+		return errors.New(err.Error())
+	}
 
 	return nil
 }

@@ -21,12 +21,11 @@ func main() {
 		log.Error("Database not allowed", err)
 		return
 	}
-	userRep := userRepository.New(conn, log)
-	userRepErr := userRep.Init()
-	if userRepErr != nil {
-		log.Error("UserRepository migration error.", err)
+	if migrErr := conn.ApplyMigrations(); migrErr != nil {
+		log.Error("Migrations not applied", migrErr)
 		return
 	}
+	userRep := userRepository.New(conn, log)
 
 	srvc := service.New(userRep, log)
 

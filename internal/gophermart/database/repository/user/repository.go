@@ -23,17 +23,6 @@ func New(conn *connector.Connector, log logger.Logger) *UserRepository {
 	}
 }
 
-func (r *UserRepository) Init() error {
-	conn := r.connector.GetDB()
-
-	err := conn.AutoMigrate(&models.User{})
-	if err != nil {
-		return errors.New(err.Error())
-	}
-
-	return nil
-}
-
 func (r *UserRepository) Create(entity *models.User) error {
 	conn := r.connector.GetDB()
 
