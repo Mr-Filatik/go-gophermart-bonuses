@@ -24,6 +24,7 @@ func New(conn *connector.Connector, log logger.Logger) *UserRepository {
 }
 
 func (r *UserRepository) Create(entity *models.User) error {
+	r.log.Debug("UserRepository.Create() was called.", "login", entity.Login)
 	conn := r.connector.GetDB()
 
 	result := conn.Create(entity)
@@ -39,10 +40,11 @@ func (r *UserRepository) Create(entity *models.User) error {
 }
 
 func (r *UserRepository) GetByLogin(login string) (*models.User, error) {
+	r.log.Debug("UserRepository.GetByLogin() was called.", "login", login)
 	conn := r.connector.GetDB()
 
-	user := models.User{Login: login}
-	result := conn.First(&user)
+	var user models.User
+	result := conn.First(&user, "login = ?", login)
 	if result.Error != nil {
 		r.log.Error("UserRepository.GetByLogin error.", result.Error, "login", login)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

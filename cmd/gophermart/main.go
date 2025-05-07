@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/config"
+	orderRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/order"
 	userRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/user"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/server"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/service"
@@ -26,8 +27,9 @@ func main() {
 		return
 	}
 	userRep := userRepository.New(conn, log)
+	orderRep := orderRepository.New(conn, log)
 
-	srvc := service.New(userRep, log)
+	srvc := service.New(userRep, orderRep, log)
 
 	serv := server.New(srvc, log)
 	serv.Start(conf.RunAddress)

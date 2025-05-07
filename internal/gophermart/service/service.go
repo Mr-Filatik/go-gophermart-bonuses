@@ -2,11 +2,11 @@ package service
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository"
-	userRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/user"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
@@ -22,14 +22,19 @@ var (
 )
 
 type Service struct {
-	userRep *userRepository.UserRepository
-	log     logger.Logger
+	userRep  repository.IUserRepository
+	orderRep repository.IOrderRepository
+	log      logger.Logger
 }
 
-func New(userRep *userRepository.UserRepository, log logger.Logger) *Service {
+func New(
+	userRep repository.IUserRepository,
+	orderRep repository.IOrderRepository,
+	log logger.Logger) *Service {
 	srv := Service{
-		userRep: userRep,
-		log:     log,
+		userRep:  userRep,
+		orderRep: orderRep,
+		log:      log,
 	}
 
 	log.Info("Service created")
@@ -38,6 +43,8 @@ func New(userRep *userRepository.UserRepository, log logger.Logger) *Service {
 }
 
 func (s *Service) UserRegister(data models.UserRegisterRequest) error {
+	s.log.Debug("Service.UserRegister() was called.", "login", data.Login)
+
 	hashedPassword, passErr := helper.GeneratePasswordHash(data.Password)
 	if passErr != nil {
 		return errors.New(passErr.Error())
@@ -60,6 +67,8 @@ func (s *Service) UserRegister(data models.UserRegisterRequest) error {
 }
 
 func (s *Service) UserLogin(data models.UserLoginRequest) error {
+	s.log.Debug("Service.UserLogin() was called.", "login", data.Login)
+
 	user, err := s.userRep.GetByLogin(data.Login)
 	if err != nil {
 		if errors.Is(err, repository.ErrEntityNotFound) {
@@ -77,37 +86,69 @@ func (s *Service) UserLogin(data models.UserLoginRequest) error {
 }
 
 func (s *Service) UserOrdersGet(login string) ([]models.UserOrder, error) {
-	if login == "empty" {
-		return make([]models.UserOrder, 0), nil
-	}
+	s.log.Debug("Service.UserOrdersGet() was called.", "login", login)
 
-	s.log.Info(
-		"Get orders",
-	)
-
-	parsedTime, err := time.Parse(time.RFC3339, "2023-10-01T12:00:00Z")
+	user, err := s.userRep.GetByLogin(login)
 	if err != nil {
 		return make([]models.UserOrder, 0), errors.New(err.Error())
 	}
 
-	orders := []models.UserOrder{
-		{Number: "12345", Status: models.UserOrderStatusNew, UploadedAt: parsedTime},
-		{Number: "67890", Status: models.UserOrderStatusProcessed, Accrual: 50.25, UploadedAt: parsedTime},
+	orders, oerr := s.orderRep.GetAllByUserID(user.ID)
+	if oerr != nil {
+		return make([]models.UserOrder, 0), errors.New(oerr.Error())
 	}
-	return orders, nil
+
+	userOrders := make([]models.UserOrder, len(orders))
+	for i, order := range orders {
+		userOrders[i] = models.UserOrder{
+			Number:     strconv.FormatUint(order.Number, 10),
+			Status:     models.UserOrderStatus(order.Status),
+			Accrual:    0,
+			UploadedAt: order.UploadedAt, // .Format(time.RFC3339)
+		}
+	}
+
+	return userOrders, nil
 }
 
 func (s *Service) UserOrdersCreate(login string, number string) error {
-	if login == "login" && number == "000001" {
-		return ErrAlreadyUploadThisUser
+	s.log.Debug(
+		"Service.UserOrdersCreate() was called.",
+		"login", login,
+		"number", number,
+	)
+
+	num, err := strconv.ParseUint(number, 10, 64)
+	if err != nil {
+		return errors.New(err.Error())
 	}
-	if login == "login" && number == "000002" {
+
+	order, err := s.orderRep.GetByNumber(num)
+	if err != nil {
+		if errors.Is(err, repository.ErrEntityNotFound) {
+			usr, uerr := s.userRep.GetByLogin(login)
+			if uerr != nil {
+				return errors.New(uerr.Error())
+			}
+			createdOrder := dbModels.UserOrder{
+				Number: num,
+				UserID: usr.ID,
+				User:   *usr,
+			}
+			cerr := s.orderRep.Create(&createdOrder)
+			if cerr != nil {
+				return errors.New(cerr.Error())
+			}
+			return nil
+		}
+		return errors.New(err.Error())
+	}
+
+	if order.User.Login == login {
+		return ErrAlreadyUploadThisUser
+	} else {
 		return ErrAlreadyUploadOtherUser
 	}
-	if number == "000000" {
-		return nil
-	}
-	return errors.New("tun tun tun tun saur")
 }
 
 func (s *Service) UserBalanceGet(login string) (models.UserBalanceResponse, error) {
