@@ -252,6 +252,14 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
+	login, ok := ctx.Value("login").(string)
+	if !ok || login == "" {
+		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
+		s.log.Error("Login not found in context", errors.New("not login in token"))
+		return
+	}
+
 	data, err := server.GetDataFromBodyInJSON[models.UserBalanceWithdrawRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
@@ -264,11 +272,11 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	berr := s.service.UserBalanceWithdraw(*data)
+	berr := s.service.UserBalanceWithdraw(*data, login)
 	if berr != nil {
 		s.log.Error("Error balance withdraw", berr)
 		if errors.Is(berr, service.ErrInvalidOrderNumber) {
-			http.Error(w, berr.Error(), http.StatusUnprocessableEntity)
+			http.Error(w, berr.Error(), http.StatusUnprocessableEntity) // если алгоритм луна не прошёл
 			return
 		} else if errors.Is(berr, service.ErrInsufficientFunds) {
 			http.Error(w, berr.Error(), http.StatusPaymentRequired)

@@ -6,6 +6,8 @@ type User struct {
 	ID           uint64 `gorm:"primarykey"`
 	Login        string
 	PasswordHash string
+	Current      float64
+	Withdrawn    float64
 }
 
 type UserOrderStatus string
@@ -24,4 +26,13 @@ type UserOrder struct {
 	Status     UserOrderStatus
 	UserID     uint64
 	User       User
+}
+
+type UserWithdrawal struct {
+	ID          uint64 `gorm:"primarykey"`
+	Order       string
+	Sum         float64
+	ProcessedAt time.Time
+	UserID      uint64
+	User        User
 }

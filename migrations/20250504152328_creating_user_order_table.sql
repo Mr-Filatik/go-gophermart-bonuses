@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS user_orders (
         REFERENCES users(id)
         ON DELETE CASCADE
 );
-COMMENT ON TABLE user_orders IS 'User orders table";';
+COMMENT ON TABLE user_orders IS 'User orders table";
 COMMENT ON COLUMN user_orders.id IS 'Unique order identifier';
 COMMENT ON COLUMN user_orders.number IS 'Unique order number';
 COMMENT ON COLUMN user_orders.uploaded_at IS 'Order upload time';

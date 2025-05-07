@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"strconv"
-	"time"
 
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository"
@@ -22,19 +21,22 @@ var (
 )
 
 type Service struct {
-	userRep  repository.IUserRepository
-	orderRep repository.IOrderRepository
-	log      logger.Logger
+	userRep   repository.IUserRepository
+	orderRep  repository.IOrderRepository
+	wthrwlRep repository.IWithdrawalRepository
+	log       logger.Logger
 }
 
 func New(
 	userRep repository.IUserRepository,
 	orderRep repository.IOrderRepository,
+	wthrwlRep repository.IWithdrawalRepository,
 	log logger.Logger) *Service {
 	srv := Service{
-		userRep:  userRep,
-		orderRep: orderRep,
-		log:      log,
+		userRep:   userRep,
+		orderRep:  orderRep,
+		wthrwlRep: wthrwlRep,
+		log:       log,
 	}
 
 	log.Info("Service created")
@@ -152,46 +154,80 @@ func (s *Service) UserOrdersCreate(login string, number string) error {
 }
 
 func (s *Service) UserBalanceGet(login string) (models.UserBalanceResponse, error) {
-	s.log.Info(
-		"User balance",
-	)
+	s.log.Debug("Service.UserBalanceGet() was called.", "login", login)
+
+	user, uerr := s.userRep.GetByLogin(login)
+	if uerr != nil {
+		return models.UserBalanceResponse{}, errors.New(uerr.Error())
+	}
+
 	return models.UserBalanceResponse{
-		Current:   12.5,
-		Withdrawn: 6.5,
+		Current:   user.Current,
+		Withdrawn: user.Withdrawn,
 	}, nil
 }
 
-func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest) error {
-	if data.Order == "000000" {
-		return ErrInvalidOrderNumber
+func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest, login string) error {
+	s.log.Debug(
+		"Service.UserBalanceWithdraw() was called.",
+		"order", data.Order,
+		"sum", data.Sum,
+	)
+
+	user, uerr := s.userRep.GetByLogin(login)
+	if uerr != nil {
+		return errors.New(uerr.Error())
 	}
-	if data.Sum > 50.0 {
+
+	if data.Sum > user.Current {
 		return ErrInsufficientFunds
 	}
 
-	s.log.Info(
-		"Balance withdraw",
-	)
+	// BEGIN TRANSACTION
+
+	createdWithdrawal := dbModels.UserWithdrawal{
+		Order:  data.Order,
+		Sum:    data.Sum,
+		UserID: user.ID,
+		User:   *user,
+	}
+	err := s.wthrwlRep.Create(&createdWithdrawal)
+	if err != nil {
+		return errors.New(err.Error())
+	}
+	user.Current -= data.Sum
+	user.Withdrawn += data.Sum
+	updErr := s.userRep.Update(user)
+	if updErr != nil {
+		return errors.New(updErr.Error())
+	}
+
+	// END TRANSACTION
+
 	return nil
 }
 
 func (s *Service) UserWithdrawalsGet(login string) ([]models.UserWithdraw, error) {
-	if login == "empty" {
-		return make([]models.UserWithdraw, 0), nil
+	s.log.Debug("Service.UserWithdrawalsGet() was called.", "login", login)
+
+	user, uerr := s.userRep.GetByLogin(login)
+	if uerr != nil {
+		return make([]models.UserWithdraw, 0), errors.New(uerr.Error())
 	}
 
-	s.log.Info(
-		"Get withdrawals",
-	)
-
-	parsedTime, err := time.Parse(time.RFC3339, "2023-10-01T12:00:00Z")
+	withdrawals, err := s.wthrwlRep.GetAllByUserID(user.ID)
 	if err != nil {
 		return make([]models.UserWithdraw, 0), errors.New(err.Error())
 	}
 
-	withdrawals := []models.UserWithdraw{
-		{Number: "12345", Sum: 100.50, ProcessedAt: parsedTime},
-		{Number: "67890", Sum: 50.25, ProcessedAt: parsedTime},
+	results := make([]models.UserWithdraw, len(withdrawals))
+	for i, item := range withdrawals {
+		results[i] = models.UserWithdraw{
+			Number:      item.Order,
+			Sum:         item.Sum,
+			ProcessedAt: item.ProcessedAt, // .Format(time.RFC3339)
+		}
 	}
-	return withdrawals, nil
+
+	return results, nil
 }

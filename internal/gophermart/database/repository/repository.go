@@ -21,10 +21,16 @@ type IRepository[T any] interface {
 type IUserRepository interface {
 	IRepository[models.User]
 	GetByLogin(login string) (*models.User, error)
+	Update(item *models.User) error
 }
 
 type IOrderRepository interface {
 	IRepository[models.UserOrder]
 	GetByNumber(number uint64) (*models.UserOrder, error)
 	GetAllByUserID(userID uint64) ([]models.UserOrder, error)
+}
+
+type IWithdrawalRepository interface {
+	IRepository[models.UserWithdrawal]
+	GetAllByUserID(userID uint64) ([]models.UserWithdrawal, error)
 }

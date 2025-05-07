@@ -4,6 +4,7 @@ import (
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/config"
 	orderRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/order"
 	userRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/user"
+	withdrawalRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/withdrawal"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/server"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/service"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/database/connector"
@@ -28,8 +29,9 @@ func main() {
 	}
 	userRep := userRepository.New(conn, log)
 	orderRep := orderRepository.New(conn, log)
+	wdrwlsRep := withdrawalRepository.New(conn, log)
 
-	srvc := service.New(userRep, orderRep, log)
+	srvc := service.New(userRep, orderRep, wdrwlsRep, log)
 
 	serv := server.New(srvc, log)
 	serv.Start(conf.RunAddress)

@@ -25,6 +25,10 @@ func New(conn *connector.Connector, log logger.Logger) *UserRepository {
 
 func (r *UserRepository) Create(entity *models.User) error {
 	r.log.Debug("UserRepository.Create() was called.", "login", entity.Login)
+
+	entity.Current = 0
+	entity.Withdrawn = 0
+
 	conn := r.connector.GetDB()
 
 	result := conn.Create(entity)
@@ -41,6 +45,7 @@ func (r *UserRepository) Create(entity *models.User) error {
 
 func (r *UserRepository) GetByLogin(login string) (*models.User, error) {
 	r.log.Debug("UserRepository.GetByLogin() was called.", "login", login)
+
 	conn := r.connector.GetDB()
 
 	var user models.User
@@ -54,4 +59,23 @@ func (r *UserRepository) GetByLogin(login string) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (r *UserRepository) Update(item *models.User) error {
+	r.log.Debug(
+		"UserRepository.Update() was called.",
+		"login", item.Login,
+		"current", item.Current,
+		"withdrawn", item.Withdrawn,
+	)
+
+	conn := r.connector.GetDB()
+
+	result := conn.Save(&item)
+	if result.Error != nil {
+		r.log.Error("UserRepository.Update error.", result.Error, "login", item.Login)
+		return errors.New(result.Error.Error())
+	}
+
+	return nil
 }
