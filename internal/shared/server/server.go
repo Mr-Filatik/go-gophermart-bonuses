@@ -67,11 +67,12 @@ func SetDataToBodyInJSON(w http.ResponseWriter, data any) error {
 	if err != nil {
 		return errors.New(err.Error())
 	}
-	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jdata)
 	if err != nil {
 		return errors.New(err.Error())
 	}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	return nil
 }
 
