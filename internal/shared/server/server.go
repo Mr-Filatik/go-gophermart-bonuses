@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -86,4 +87,17 @@ func CreateToken(login string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString(secretKey)
+}
+
+type ContextKey string
+
+const ContextKeyUserLogin ContextKey = ContextKey("login")
+
+func GetStringFromContext(ctx context.Context, key ContextKey) (string, bool) {
+	value, ok := ctx.Value(key).(string)
+	return value, ok
+}
+
+func SetStringToContext(ctx context.Context, key ContextKey, value string) context.Context {
+	return context.WithValue(ctx, key, value)
 }

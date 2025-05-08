@@ -9,7 +9,7 @@ type EnvName string
 
 const (
 	EnvNameRunAddress  EnvName = "RUN_ADDRESS"
-	EnvNameDatabaseUri EnvName = "DATABASE_URI"
+	EnvNameDatabaseURI EnvName = "DATABASE_URI"
 )
 
 func GetStringFromEnvironment(key EnvName) (string, bool) {

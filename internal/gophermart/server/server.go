@@ -158,8 +158,7 @@ func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	login, ok := ctx.Value("login").(string)
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
 		s.log.Error("Login not found in context", errors.New("not login in token"))
@@ -225,8 +224,7 @@ func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	login, ok := ctx.Value("login").(string)
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
 		s.log.Error("Login not found in context", errors.New("not login in token"))
@@ -252,8 +250,7 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	login, ok := ctx.Value("login").(string)
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
 		s.log.Error("Login not found in context", errors.New("not login in token"))
@@ -294,8 +291,7 @@ func (s *Server) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	login, ok := ctx.Value("login").(string)
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
 		s.log.Error("Login not found in context", errors.New("not login in token"))

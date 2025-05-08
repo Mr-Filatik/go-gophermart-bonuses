@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	migrations_root "github.com/Mr-Filatik/go-gophermart-bonuses"
+	migrations "github.com/Mr-Filatik/go-gophermart-bonuses"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
@@ -50,13 +50,13 @@ func (c *Connector) Connect(dbURI string) error {
 func (c *Connector) ApplyMigrations() error {
 	sqlDB, _ := c.db.DB()
 
-	goose.SetBaseFS(migrations_root.EmbedMigrations)
+	goose.SetBaseFS(migrations.EmbedMigrations)
 
 	if err := goose.SetDialect("postgres"); err != nil {
 		return errors.New(err.Error())
 	}
 
-	if err := goose.Up(sqlDB, migrations_root.DirMigrations); err != nil {
+	if err := goose.Up(sqlDB, migrations.DirMigrations); err != nil {
 		return errors.New(err.Error())
 	}
 

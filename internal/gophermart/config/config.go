@@ -11,25 +11,25 @@ type EnvName = config.EnvName
 const (
 	// Env Names
 	EnvNameRunAddress             = config.EnvNameRunAddress
-	EnvNameDatabaseUri            = config.EnvNameDatabaseUri
+	EnvNameDatabaseURI            = config.EnvNameDatabaseURI
 	EnvNameAccuralAddress EnvName = "ACCRUAL_SYSTEM_ADDRESS"
 
 	// Default Values
 	defaultValueRunAddress     string = "localhost:8080"
-	defaultValueDatabaseUri    string = "postgres://user:password@host:port/database"
+	defaultValueDatabaseURI    string = "postgres://user:password@host:port/database"
 	defaultValueAccuralAddress string = "localhost:8081"
 )
 
 type Config struct {
 	RunAddress           string
-	DatabaseUri          string
+	DatabaseURI          string
 	AccuralSystemAddress string
 }
 
 func Initialize() *Config {
 	conf := Config{
 		RunAddress:           defaultValueRunAddress,
-		DatabaseUri:          defaultValueDatabaseUri,
+		DatabaseURI:          defaultValueDatabaseURI,
 		AccuralSystemAddress: defaultValueAccuralAddress,
 	}
 
@@ -41,7 +41,7 @@ func Initialize() *Config {
 
 func (c *Config) getFlags() {
 	argRunAddress := flag.String("a", defaultValueRunAddress, "Run address")
-	argDatabaseUri := flag.String("d", defaultValueDatabaseUri, "Database uri")
+	argDatabaseURI := flag.String("d", defaultValueDatabaseURI, "Database uri")
 	argAccuralAddress := flag.String("r", defaultValueAccuralAddress, "Accural system address")
 
 	flag.Parse()
@@ -49,8 +49,8 @@ func (c *Config) getFlags() {
 	if argRunAddress != nil && *argRunAddress != "" {
 		c.RunAddress = *argRunAddress
 	}
-	if argDatabaseUri != nil && *argDatabaseUri != "" {
-		c.DatabaseUri = *argDatabaseUri
+	if argDatabaseURI != nil && *argDatabaseURI != "" {
+		c.DatabaseURI = *argDatabaseURI
 	}
 	if argAccuralAddress != nil && *argAccuralAddress != "" {
 		c.AccuralSystemAddress = *argAccuralAddress
@@ -63,9 +63,9 @@ func (c *Config) getEnvironments() {
 		c.RunAddress = runAdrress
 	}
 
-	databaseUri, ok := config.GetStringFromEnvironment(EnvNameDatabaseUri)
+	databaseURI, ok := config.GetStringFromEnvironment(EnvNameDatabaseURI)
 	if ok {
-		c.DatabaseUri = databaseUri
+		c.DatabaseURI = databaseURI
 	}
 
 	accuralAddress, ok := config.GetStringFromEnvironment(EnvNameAccuralAddress)

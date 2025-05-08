@@ -18,7 +18,7 @@ func main() {
 	conf := config.Initialize()
 
 	conn := connector.New(log)
-	err := conn.Connect(conf.DatabaseUri)
+	err := conn.Connect(conf.DatabaseURI)
 	if err != nil {
 		log.Error("Database not allowed", err)
 		return

@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -35,8 +35,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, "login", claims.Subject)
+			ctx := server.SetStringToContext(r.Context(), server.ContextKeyUserLogin, claims.Subject)
 			r = r.WithContext(ctx)
 		} else {
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
