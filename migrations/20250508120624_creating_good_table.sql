@@ -1,10 +1,10 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS goods (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     description TEXT NOT NULL,
-    price DOUBLE PRECISION NOT NULL,
-    order_id INTEGER NOT NULL,
+    price BIGINT NOT NULL,
+    order_id BIGINT NOT NULL,
 
     CONSTRAINT fk_order
         FOREIGN KEY (order_id)

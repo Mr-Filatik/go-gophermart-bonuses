@@ -2,9 +2,9 @@
 -- +goose StatementBegin
 CREATE TYPE reward_types AS ENUM ('%', 'pt');
 CREATE TABLE IF NOT EXISTS rules (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     match TEXT NOT NULL,
-    reward DOUBLE PRECISION NOT NULL,
+    reward BIGINT NOT NULL,
     reward_type reward_types NOT NULL
 );
 COMMENT ON TABLE rules IS 'Rules table';

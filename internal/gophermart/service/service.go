@@ -105,7 +105,7 @@ func (s *Service) UserOrdersGet(login string) ([]models.UserOrder, error) {
 		userOrders[i] = models.UserOrder{
 			Number:     strconv.FormatUint(order.Number, 10),
 			Status:     models.UserOrderStatus(order.Status),
-			Accrual:    0,
+			Accrual:    helper.ConvertPriceToFloat64(order.Accrual),
 			UploadedAt: order.UploadedAt, // .Format(time.RFC3339)
 		}
 	}
@@ -162,8 +162,8 @@ func (s *Service) UserBalanceGet(login string) (models.UserBalanceResponse, erro
 	}
 
 	return models.UserBalanceResponse{
-		Current:   user.Current,
-		Withdrawn: user.Withdrawn,
+		Current:   helper.ConvertPriceToFloat64(user.Current),
+		Withdrawn: helper.ConvertPriceToFloat64(user.Withdrawn),
 	}, nil
 }
 
@@ -179,7 +179,9 @@ func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest, lo
 		return errors.New(uerr.Error())
 	}
 
-	if data.Sum > user.Current {
+	sum := helper.ConvertPriceToUint64(data.Sum)
+
+	if sum > user.Current {
 		return ErrInsufficientFunds
 	}
 
@@ -187,7 +189,7 @@ func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest, lo
 
 	createdWithdrawal := dbModels.UserWithdrawal{
 		Order:  data.Order,
-		Sum:    data.Sum,
+		Sum:    sum,
 		UserID: user.ID,
 		User:   *user,
 	}
@@ -195,8 +197,8 @@ func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest, lo
 	if err != nil {
 		return errors.New(err.Error())
 	}
-	user.Current -= data.Sum
-	user.Withdrawn += data.Sum
+	user.Current -= sum
+	user.Withdrawn += sum
 	updErr := s.userRep.Update(user)
 	if updErr != nil {
 		return errors.New(updErr.Error())
@@ -224,7 +226,7 @@ func (s *Service) UserWithdrawalsGet(login string) ([]models.UserWithdraw, error
 	for i, item := range withdrawals {
 		results[i] = models.UserWithdraw{
 			Number:      item.Order,
-			Sum:         item.Sum,
+			Sum:         helper.ConvertPriceToFloat64(item.Sum),
 			ProcessedAt: item.ProcessedAt, // .Format(time.RFC3339)
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/repository"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 )
 
@@ -58,7 +59,7 @@ func (s *Service) OrderGet(number string) (models.OrderResponse, error) {
 	return models.OrderResponse{
 		Order:   strconv.FormatUint(order.Number, 10),
 		Status:  models.OrderStatus(order.Status),
-		Accrual: order.Accrual,
+		Accrual: helper.ConvertPriceToFloat64(order.Accrual),
 	}, nil
 }
 
@@ -96,7 +97,7 @@ func (s *Service) OrderCreate(data models.OrderRequest) error {
 	for _, item := range data.Goods {
 		createdGood := dbModels.Good{
 			Description: item.Description,
-			Price:       item.Price,
+			Price:       helper.ConvertPriceToUint64(item.Price),
 			OrderID:     order.ID,
 			Order:       *order,
 		}
@@ -121,7 +122,7 @@ func (s *Service) GoodCreate(data models.GoodRequest) error {
 
 	createdRule := dbModels.Rule{
 		Match:      data.Match,
-		Reward:     data.Reward,
+		Reward:     helper.ConvertPriceToUint64(data.Reward),
 		RewardType: dbModels.RuleRewardType(data.RewardType),
 	}
 	cerr := s.rulRep.Create(&createdRule)

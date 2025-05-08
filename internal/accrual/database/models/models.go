@@ -14,7 +14,7 @@ const (
 type Order struct {
 	ID         uint64 `gorm:"primarykey"`
 	Number     uint64
-	Accrual    float64
+	Accrual    uint64
 	UploadedAt time.Time
 	Status     OrderStatus
 }
@@ -22,7 +22,7 @@ type Order struct {
 type Good struct {
 	ID          uint64 `gorm:"primarykey"`
 	Description string
-	Price       float64
+	Price       uint64
 	OrderID     uint64
 	Order       Order
 }
@@ -37,6 +37,6 @@ const (
 type Rule struct {
 	ID         uint64 `gorm:"primarykey"`
 	Match      string
-	Reward     float64
+	Reward     uint64
 	RewardType RuleRewardType
 }

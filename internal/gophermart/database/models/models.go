@@ -6,8 +6,8 @@ type User struct {
 	ID           uint64 `gorm:"primarykey"`
 	Login        string
 	PasswordHash string
-	Current      float64
-	Withdrawn    float64
+	Current      uint64
+	Withdrawn    uint64
 }
 
 type UserOrderStatus string
@@ -22,6 +22,7 @@ const (
 type UserOrder struct {
 	ID         uint64 `gorm:"primarykey"`
 	Number     uint64
+	Accrual    uint64
 	UploadedAt time.Time
 	Status     UserOrderStatus
 	UserID     uint64
@@ -31,7 +32,7 @@ type UserOrder struct {
 type UserWithdrawal struct {
 	ID          uint64 `gorm:"primarykey"`
 	Order       string
-	Sum         float64
+	Sum         uint64
 	ProcessedAt time.Time
 	UserID      uint64
 	User        User

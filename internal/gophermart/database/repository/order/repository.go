@@ -28,6 +28,7 @@ func (r *OrderRepository) Create(entity *models.UserOrder) error {
 	r.log.Debug("OrderRepository.Create() was called.", "number", entity.Number)
 
 	entity.UploadedAt = time.Now()
+	entity.Accrual = 0
 	entity.Status = models.UserOrderStatusNew
 
 	conn := r.connector.GetDB()

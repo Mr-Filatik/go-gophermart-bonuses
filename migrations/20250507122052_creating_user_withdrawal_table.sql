@@ -1,11 +1,11 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS user_withdrawals (
-    "id" SERIAL PRIMARY KEY,
+    "id" BIGSERIAL PRIMARY KEY,
     "order" TEXT UNIQUE NOT NULL,
-    "sum" DOUBLE PRECISION NOT NULL,
+    "sum" BIGINT NOT NULL,
     "processed_at" TIMESTAMP NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "user_id" BIGINT NOT NULL,
 
     CONSTRAINT fk_user
         FOREIGN KEY ("user_id")

@@ -2,11 +2,11 @@
 -- +goose StatementBegin
 CREATE TYPE order_status AS ENUM ('REGISTERED', 'PROCESSING', 'INVALID', 'PROCESSED');
 CREATE TABLE IF NOT EXISTS orders (
-    id SERIAL PRIMARY KEY,
-    number INTEGER NOT NULL UNIQUE,
+    id BIGSERIAL PRIMARY KEY,
+    number BIGINT NOT NULL UNIQUE,
     uploaded_at TIMESTAMP NOT NULL,
     status order_status NOT NULL,
-    accrual DOUBLE PRECISION NOT NULL
+    accrual BIGINT NOT NULL
 );
 COMMENT ON TABLE orders IS 'Orders table';
 COMMENT ON COLUMN orders.id IS 'Unique order identifier';
