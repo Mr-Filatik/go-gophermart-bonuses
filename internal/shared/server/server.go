@@ -76,18 +76,24 @@ func SetDataToBodyInJSON(w http.ResponseWriter, data any) error {
 	return nil
 }
 
+const TokenExpiredHours = 24
+
 func CreateToken(login string) (string, error) {
 	secretKey := []byte("FILATIK_SECRET_KEY_FOR_TOKEN")
 
 	claims := &jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+		ExpiresAt: time.Now().Add(time.Hour * TokenExpiredHours).Unix(),
 		Issuer:    "gophermart-bonuces.gophermart",
 		Subject:   login,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(secretKey)
+	strToken, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", errors.New(err.Error())
+	}
+	return strToken, nil
 }
 
 type ContextKey string

@@ -45,7 +45,7 @@ func New(
 }
 
 func (s *Service) UserRegister(data models.UserRegisterRequest) error {
-	s.log.Debug("Service.UserRegister() was called.", "login", data.Login)
+	s.log.Debug("Service.UserRegister() was called.", "register_login", data.Login)
 
 	hashedPassword, passErr := helper.GeneratePasswordHash(data.Password)
 	if passErr != nil {
@@ -54,7 +54,7 @@ func (s *Service) UserRegister(data models.UserRegisterRequest) error {
 
 	user := dbModels.User{
 		Login:        data.Login,
-		PasswordHash: string(hashedPassword),
+		PasswordHash: hashedPassword,
 	}
 
 	err := s.userRep.Create(&user)
@@ -69,7 +69,7 @@ func (s *Service) UserRegister(data models.UserRegisterRequest) error {
 }
 
 func (s *Service) UserLogin(data models.UserLoginRequest) error {
-	s.log.Debug("Service.UserLogin() was called.", "login", data.Login)
+	s.log.Debug("Service.UserLogin() was called.", "login_login", data.Login)
 
 	user, err := s.userRep.GetByLogin(data.Login)
 	if err != nil {
@@ -88,7 +88,7 @@ func (s *Service) UserLogin(data models.UserLoginRequest) error {
 }
 
 func (s *Service) UserOrdersGet(login string) ([]models.UserOrder, error) {
-	s.log.Debug("Service.UserOrdersGet() was called.", "login", login)
+	s.log.Debug("Service.UserOrdersGet() was called.", "order_login", login)
 
 	user, err := s.userRep.GetByLogin(login)
 	if err != nil {
@@ -101,12 +101,12 @@ func (s *Service) UserOrdersGet(login string) ([]models.UserOrder, error) {
 	}
 
 	userOrders := make([]models.UserOrder, len(orders))
-	for i, order := range orders {
+	for i := range orders {
 		userOrders[i] = models.UserOrder{
-			Number:     strconv.FormatUint(order.Number, 10),
-			Status:     models.UserOrderStatus(order.Status),
-			Accrual:    helper.ConvertPriceToFloat64(order.Accrual),
-			UploadedAt: order.UploadedAt, // .Format(time.RFC3339)
+			Number:     strconv.FormatUint(orders[i].Number, 10),
+			Status:     models.UserOrderStatus(orders[i].Status),
+			Accrual:    helper.ConvertPriceToFloat64(orders[i].Accrual),
+			UploadedAt: orders[i].UploadedAt, // .Format(time.RFC3339)
 		}
 	}
 
@@ -116,7 +116,7 @@ func (s *Service) UserOrdersGet(login string) ([]models.UserOrder, error) {
 func (s *Service) UserOrdersCreate(login string, number string) error {
 	s.log.Debug(
 		"Service.UserOrdersCreate() was called.",
-		"login", login,
+		"order_login", login,
 		"number", number,
 	)
 

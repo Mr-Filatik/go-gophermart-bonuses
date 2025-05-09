@@ -24,7 +24,7 @@ func New(conn *connector.Connector, log logger.Logger) *UserRepository {
 }
 
 func (r *UserRepository) Create(entity *models.User) error {
-	r.log.Debug("UserRepository.Create() was called.", "login", entity.Login)
+	r.log.Debug("UserRepository.Create() was called.", "user_login", entity.Login)
 
 	entity.Current = 0
 	entity.Withdrawn = 0
@@ -33,7 +33,7 @@ func (r *UserRepository) Create(entity *models.User) error {
 
 	result := conn.Create(entity)
 	if result.Error != nil {
-		r.log.Error("UserRepository.Create error.", result.Error, "login", entity.Login)
+		r.log.Error("UserRepository.Create error.", result.Error, "user_login", entity.Login)
 		if strings.Contains(result.Error.Error(), "ERROR: duplicate key value violates unique constraint") {
 			return repository.ErrEntityAlreadyExists
 		}
@@ -64,7 +64,7 @@ func (r *UserRepository) GetByLogin(login string) (*models.User, error) {
 func (r *UserRepository) Update(item *models.User) error {
 	r.log.Debug(
 		"UserRepository.Update() was called.",
-		"login", item.Login,
+		"user_login", item.Login,
 		"current", item.Current,
 		"withdrawn", item.Withdrawn,
 	)

@@ -25,7 +25,7 @@ func New(conn *connector.Connector, log logger.Logger) *OrderRepository {
 }
 
 func (r *OrderRepository) Create(entity *models.Order) error {
-	r.log.Debug("OrderRepository.Create() was called.", "number", entity.Number)
+	r.log.Debug("OrderRepository.Create() was called.", "order_number", entity.Number)
 
 	entity.UploadedAt = time.Now()
 	entity.Accrual = 0
@@ -35,7 +35,7 @@ func (r *OrderRepository) Create(entity *models.Order) error {
 
 	result := conn.Create(entity)
 	if result.Error != nil {
-		r.log.Error("OrderRepository.Create error.", result.Error, "number", entity.Number)
+		r.log.Error("OrderRepository.Create error.", result.Error, "order_number", entity.Number)
 		if strings.Contains(result.Error.Error(), "ERROR: duplicate key value violates unique constraint") {
 			return repository.ErrEntityAlreadyExists
 		}

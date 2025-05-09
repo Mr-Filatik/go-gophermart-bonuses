@@ -9,12 +9,12 @@ import (
 type EnvName = config.EnvName
 
 const (
-	// Env Names
+	// Env names.
 	EnvNameRunAddress             = config.EnvNameRunAddress
 	EnvNameDatabaseURI            = config.EnvNameDatabaseURI
 	EnvNameAccuralAddress EnvName = "ACCRUAL_SYSTEM_ADDRESS"
 
-	// Default Values
+	// Default values.
 	defaultValueRunAddress     string = "localhost:8080"
 	defaultValueDatabaseURI    string = "postgres://user:password@host:port/database"
 	defaultValueAccuralAddress string = "localhost:8081"

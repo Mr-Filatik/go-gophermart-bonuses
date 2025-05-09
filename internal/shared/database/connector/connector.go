@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const DatabaseConnectionCount = 10
+
 type Connector struct {
 	db  *gorm.DB
 	log logger.Logger
@@ -32,8 +34,8 @@ func (c *Connector) Connect(dbURI string) error {
 	}
 
 	sqlDB, _ := db.DB()
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetMaxIdleConns(DatabaseConnectionCount)
+	sqlDB.SetMaxOpenConns(DatabaseConnectionCount)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	pingErr := sqlDB.Ping()

@@ -34,6 +34,6 @@ const (
 
 type GoodRequest struct {
 	Match      string     `json:"match"`
-	Reward     float64    `json:"reward"`
 	RewardType RewardType `json:"reward_type"`
+	Reward     float64    `json:"reward"`
 }

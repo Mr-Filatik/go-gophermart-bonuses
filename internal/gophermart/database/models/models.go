@@ -3,9 +3,9 @@ package models
 import "time"
 
 type User struct {
-	ID           uint64 `gorm:"primarykey"`
 	Login        string
 	PasswordHash string
+	ID           uint64 `gorm:"primarykey"`
 	Current      uint64
 	Withdrawn    uint64
 }
@@ -20,20 +20,20 @@ const (
 )
 
 type UserOrder struct {
+	UploadedAt time.Time
+	Status     UserOrderStatus
+	User       User
 	ID         uint64 `gorm:"primarykey"`
 	Number     uint64
 	Accrual    uint64
-	UploadedAt time.Time
-	Status     UserOrderStatus
 	UserID     uint64
-	User       User
 }
 
 type UserWithdrawal struct {
-	ID          uint64 `gorm:"primarykey"`
-	Order       string
-	Sum         uint64
 	ProcessedAt time.Time
-	UserID      uint64
+	Order       string
 	User        User
+	ID          uint64 `gorm:"primarykey"`
+	Sum         uint64
+	UserID      uint64
 }

@@ -22,10 +22,10 @@ const (
 )
 
 type UserOrder struct {
+	UploadedAt time.Time       `json:"uploaded_at"`
 	Number     string          `json:"number"`
 	Status     UserOrderStatus `json:"status"`
 	Accrual    float64         `json:"accrual,omitempty"`
-	UploadedAt time.Time       `json:"uploaded_at"`
 }
 
 type UserBalanceResponse struct {
@@ -39,7 +39,7 @@ type UserBalanceWithdrawRequest struct {
 }
 
 type UserWithdraw struct {
+	ProcessedAt time.Time `json:"processed_at"`
 	Number      string    `json:"number"`
 	Sum         float64   `json:"sum"`
-	ProcessedAt time.Time `json:"processed_at"`
 }

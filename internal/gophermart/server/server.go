@@ -14,6 +14,13 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+var (
+	ErrLoginNotFoundInContext = errors.New("not login in context")
+
+	MessageErrGetDataFromContext = "Get data from context error"
+	MessageErrGetDataFromBody    = "Get data from body error"
+)
+
 type Server struct {
 	router  *chi.Mux
 	service *service.Service
@@ -70,7 +77,7 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 
 	data, err := server.GetDataFromBodyInJSON[models.UserRegisterRequest](r)
 	if err != nil {
-		s.log.Error("Error get data from body", err)
+		s.log.Error(MessageErrGetDataFromBody, err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -102,7 +109,7 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Path:     "/api/user",
 		HttpOnly: true,
-		Expires:  time.Now().Add(24 * time.Hour),
+		Expires:  time.Now().Add(server.TokenExpiredHours * time.Hour),
 	})
 }
 
@@ -114,7 +121,7 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 
 	data, err := server.GetDataFromBodyInJSON[models.UserLoginRequest](r)
 	if err != nil {
-		s.log.Error("Error get data from body", err)
+		s.log.Error(MessageErrGetDataFromBody, err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -148,7 +155,7 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Path:     "/api/user",
 		HttpOnly: true,
-		Expires:  time.Now().Add(24 * time.Hour),
+		Expires:  time.Now().Add(server.TokenExpiredHours * time.Hour),
 	})
 }
 
@@ -160,8 +167,8 @@ func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
 
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
-		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
-		s.log.Error("Login not found in context", errors.New("not login in token"))
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
 		return
 	}
 
@@ -187,7 +194,7 @@ func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		data, err := server.GetStringFromBody(r)
 		if err != nil {
-			s.log.Error("Error get data from body", err)
+			s.log.Error(MessageErrGetDataFromBody, err)
 			http.Error(w, err.Error(), http.StatusBadRequest) // dont used
 			return
 		}
@@ -226,8 +233,8 @@ func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
 
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
-		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
-		s.log.Error("Login not found in context", errors.New("not login in token"))
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
 		return
 	}
 
@@ -252,14 +259,14 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
-		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
-		s.log.Error("Login not found in context", errors.New("not login in token"))
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
 		return
 	}
 
 	data, err := server.GetDataFromBodyInJSON[models.UserBalanceWithdrawRequest](r)
 	if err != nil {
-		s.log.Error("Error get data from body", err)
+		s.log.Error(MessageErrGetDataFromBody, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -272,16 +279,15 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 	berr := s.service.UserBalanceWithdraw(*data, login)
 	if berr != nil {
 		s.log.Error("Error balance withdraw", berr)
-		if errors.Is(berr, service.ErrInvalidOrderNumber) {
+		switch {
+		case errors.Is(berr, service.ErrInvalidOrderNumber):
 			http.Error(w, berr.Error(), http.StatusUnprocessableEntity) // если алгоритм луна не прошёл
-			return
-		} else if errors.Is(berr, service.ErrInsufficientFunds) {
+		case errors.Is(berr, service.ErrInsufficientFunds):
 			http.Error(w, berr.Error(), http.StatusPaymentRequired)
-			return
-		} else {
+		default:
 			http.Error(w, berr.Error(), http.StatusInternalServerError)
-			return
 		}
+		return
 	}
 }
 
@@ -293,8 +299,8 @@ func (s *Server) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
 
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
-		http.Error(w, "Unauthorized: Login not found in context", http.StatusUnauthorized)
-		s.log.Error("Login not found in context", errors.New("not login in token"))
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
 		return
 	}
 
