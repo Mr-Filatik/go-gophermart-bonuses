@@ -9,11 +9,18 @@ import (
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server"
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/time/rate"
+)
+
+const (
+	ServerLimitPerSecond rate.Limit = 2
+	ServerLimitBuffer    int        = 4
 )
 
 type Server struct {
 	router  *chi.Mux
 	service *service.Service
+	limiter *rate.Limiter
 	log     logger.Logger
 }
 
@@ -21,6 +28,7 @@ func New(srvc *service.Service, log logger.Logger) *Server {
 	srv := Server{
 		router:  chi.NewRouter(),
 		service: srvc,
+		limiter: rate.NewLimiter(ServerLimitPerSecond, ServerLimitBuffer),
 		log:     log,
 	}
 
@@ -54,7 +62,10 @@ func (s *Server) OrderNumber(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 429 — превышено количество запросов к сервису.
+	if !s.limiter.Allow() {
+		w.WriteHeader(http.StatusTooManyRequests)
+		return
+	}
 
 	number := r.PathValue("number")
 
