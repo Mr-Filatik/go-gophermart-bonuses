@@ -10,18 +10,15 @@ func ValidateAlgorithmLuhn(number uint64) bool {
 	var sum uint64 = 0
 
 	for number > 0 {
+		value := number % algorithmLuhnDecimalDivisor
 		if isEvenPosition {
-			value := number % algorithmLuhnDecimalDivisor
 			value *= 2
 			if value > algorithmLuhnCondition {
 				value -= algorithmLuhnCondition
 			}
-			sum += value
-			number /= algorithmLuhnDecimalDivisor
-		} else {
-			sum += number % algorithmLuhnDecimalDivisor
-			number /= algorithmLuhnDecimalDivisor
 		}
+		sum += value
+		number /= algorithmLuhnDecimalDivisor
 		isEvenPosition = !isEvenPosition
 	}
 
