@@ -202,22 +202,23 @@ func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
 		s.log.Info("Data", "data", data)
 		ok, _ := regexp.MatchString(`^\d+$`, data)
 		if !ok {
-			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		cerr := s.service.UserOrdersCreate(login, data)
 		if cerr != nil {
 			s.log.Error("Error create order", cerr)
-			if errors.Is(cerr, service.ErrAlreadyUploadThisUser) {
+			switch {
+			case errors.Is(cerr, service.ErrInvalidOrderNumber):
+				w.WriteHeader(http.StatusUnprocessableEntity)
+			case errors.Is(cerr, service.ErrAlreadyUploadThisUser):
 				w.WriteHeader(http.StatusOK)
-				return
-			}
-			if errors.Is(cerr, service.ErrAlreadyUploadOtherUser) {
+			case errors.Is(cerr, service.ErrAlreadyUploadOtherUser):
 				http.Error(w, cerr.Error(), http.StatusConflict)
-				return
+			default:
+				http.Error(w, cerr.Error(), http.StatusInternalServerError)
 			}
-			http.Error(w, cerr.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -281,7 +282,7 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 		s.log.Error("Error balance withdraw", berr)
 		switch {
 		case errors.Is(berr, service.ErrInvalidOrderNumber):
-			http.Error(w, berr.Error(), http.StatusUnprocessableEntity) // если алгоритм луна не прошёл
+			http.Error(w, berr.Error(), http.StatusUnprocessableEntity)
 		case errors.Is(berr, service.ErrInsufficientFunds):
 			http.Error(w, berr.Error(), http.StatusPaymentRequired)
 		default:

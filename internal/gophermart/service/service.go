@@ -125,6 +125,10 @@ func (s *Service) UserOrdersCreate(login string, number string) error {
 		return errors.New(err.Error())
 	}
 
+	if ok := helper.ValidateAlgorithmLuhn(num); !ok {
+		return ErrInvalidOrderNumber
+	}
+
 	order, err := s.orderRep.GetByNumber(num)
 	if err != nil {
 		if errors.Is(err, repository.ErrEntityNotFound) {
@@ -174,12 +178,16 @@ func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest, lo
 		"sum", data.Sum,
 	)
 
+	sum := helper.ConvertPriceToUint64(data.Sum)
+
+	if ok := helper.ValidateAlgorithmLuhn(sum); !ok {
+		return ErrInvalidOrderNumber
+	}
+
 	user, uerr := s.userRep.GetByLogin(login)
 	if uerr != nil {
 		return errors.New(uerr.Error())
 	}
-
-	sum := helper.ConvertPriceToUint64(data.Sum)
 
 	if sum > user.Current {
 		return ErrInsufficientFunds
