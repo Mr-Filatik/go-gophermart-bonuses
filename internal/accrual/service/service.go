@@ -7,6 +7,7 @@ import (
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/repository"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/worker"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 )
@@ -21,18 +22,21 @@ type Service struct {
 	goodRep repository.IGoodRepository
 	rulRep  repository.IRuleRepository
 	log     logger.Logger
+	worker  *worker.Worker
 }
 
 func New(
 	ordRep repository.IOrderRepository,
 	goodRep repository.IGoodRepository,
 	rulRep repository.IRuleRepository,
-	log logger.Logger) *Service {
+	log logger.Logger,
+	worker *worker.Worker) *Service {
 	srv := Service{
 		ordRep:  ordRep,
 		goodRep: goodRep,
 		rulRep:  rulRep,
 		log:     log,
+		worker:  worker,
 	}
 
 	log.Info("Service created")
@@ -108,6 +112,8 @@ func (s *Service) OrderCreate(data models.OrderRequest) error {
 	}
 
 	// END TRANSACTION
+
+	s.worker.AddTask(createdOrder.Number)
 
 	return nil
 }

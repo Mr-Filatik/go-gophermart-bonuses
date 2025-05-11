@@ -7,6 +7,7 @@ import (
 	ruleRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/repository/rule"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/server"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/service"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/worker"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/database/connector"
 	logger "github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger/zap/sugar"
 )
@@ -31,7 +32,11 @@ func main() {
 	goodRep := goodRepository.New(conn, log)
 	ruleRep := ruleRepository.New(conn, log)
 
-	srvc := service.New(orderRep, goodRep, ruleRep, log)
+	wrkr := worker.New(orderRep, goodRep, ruleRep, log)
+	wrkr.Run()
+	defer wrkr.Close()
+
+	srvc := service.New(orderRep, goodRep, ruleRep, log, wrkr)
 
 	serv := server.New(srvc, log)
 	serv.Start(conf.RunAddress)

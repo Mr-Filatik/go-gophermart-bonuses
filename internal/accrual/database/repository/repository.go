@@ -21,6 +21,7 @@ type IRepository[T any] interface {
 type IOrderRepository interface {
 	IRepository[models.Order]
 	GetByNumber(number uint64) (*models.Order, error)
+	Update(entity *models.Order) error
 }
 
 type IGoodRepository interface {
@@ -30,5 +31,5 @@ type IGoodRepository interface {
 
 type IRuleRepository interface {
 	IRepository[models.Rule]
-	// GetAll()
+	GetAll() ([]models.Rule, error)
 }

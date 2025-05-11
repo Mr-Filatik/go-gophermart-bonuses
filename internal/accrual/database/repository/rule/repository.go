@@ -8,6 +8,7 @@ import (
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/repository"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/database/connector"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
+	"gorm.io/gorm"
 )
 
 type RuleRepository struct {
@@ -37,4 +38,22 @@ func (r *RuleRepository) Create(entity *models.Rule) error {
 	}
 
 	return nil
+}
+
+func (r *RuleRepository) GetAll() ([]models.Rule, error) {
+	r.log.Debug("RuleRepository.GetAll() was called.")
+
+	conn := r.connector.GetDB()
+
+	var users []models.Rule
+	result := conn.Find(&users)
+	if result.Error != nil {
+		r.log.Error("OrderRepository.GetAllByUserID error.", result.Error)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, repository.ErrEntityNotFound
+		}
+		return nil, errors.New(result.Error.Error())
+	}
+
+	return users, nil
 }
