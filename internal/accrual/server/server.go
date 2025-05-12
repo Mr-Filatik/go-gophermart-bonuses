@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/server/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/service"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server"

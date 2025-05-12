@@ -34,11 +34,11 @@ type OrderResponse struct {
 }
 
 type Worker struct {
-	endpoint string
-	jobs     chan uint64
 	ordRep   repository.IOrderRepository
 	useRep   repository.IUserRepository
 	log      logger.Logger
+	jobs     chan uint64
+	endpoint string
 }
 
 func New(

@@ -6,7 +6,7 @@ import (
 
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/repository"
-	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/server/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/worker"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"

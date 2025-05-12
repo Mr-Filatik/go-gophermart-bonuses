@@ -46,30 +46,22 @@ func (r *UserRepository) Create(entity *models.User) error {
 func (r *UserRepository) GetByID(userID uint64) (*models.User, error) {
 	r.log.Debug("UserRepository.GetByLogin() was called.", "userID", userID)
 
-	conn := r.connector.GetDB()
-
-	var user models.User
-	result := conn.First(&user, "id = ?", userID)
-	if result.Error != nil {
-		r.log.Error("UserRepository.GetByLogin error.", result.Error, "userID", userID)
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, repository.ErrEntityNotFound
-		}
-		return nil, errors.New(result.Error.Error())
-	}
-
-	return &user, nil
+	return r.getByField("id = ?", userID)
 }
 
 func (r *UserRepository) GetByLogin(login string) (*models.User, error) {
 	r.log.Debug("UserRepository.GetByLogin() was called.", "login", login)
 
+	return r.getByField("login = ?", login)
+}
+
+func (r *UserRepository) getByField(condition string, value any) (*models.User, error) {
 	conn := r.connector.GetDB()
 
 	var user models.User
-	result := conn.First(&user, "login = ?", login)
+	result := conn.First(&user, condition, value)
 	if result.Error != nil {
-		r.log.Error("UserRepository.GetByLogin error.", result.Error, "login", login)
+		r.log.Error("UserRepository.GetByLogin error.", result.Error, condition, value)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, repository.ErrEntityNotFound
 		}

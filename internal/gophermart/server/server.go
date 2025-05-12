@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/middleware"
-	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/server/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/service"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server"
