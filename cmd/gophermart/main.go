@@ -38,6 +38,6 @@ func main() {
 
 	srvc := service.New(userRep, orderRep, wdrwlsRep, wrkr, log)
 
-	serv := server.New(srvc, log)
+	serv := server.New(srvc, conf.SecretKey, log)
 	serv.Start(conf.RunAddress)
 }

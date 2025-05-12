@@ -25,13 +25,15 @@ type Server struct {
 	router  *chi.Mux
 	service *service.Service
 	log     logger.Logger
+	secret  string
 }
 
-func New(srvc *service.Service, log logger.Logger) *Server {
+func New(srvc *service.Service, secret string, log logger.Logger) *Server {
 	srv := Server{
 		router:  chi.NewRouter(),
 		service: srvc,
 		log:     log,
+		secret:  secret,
 	}
 
 	srv.registerHandlers()
@@ -99,7 +101,7 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	token, terr := server.CreateToken(data.Login)
+	token, terr := server.CreateToken(data.Login, s.secret)
 	if terr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -144,7 +146,7 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	token, terr := server.CreateToken(data.Login)
+	token, terr := server.CreateToken(data.Login, s.secret)
 	if terr != nil {
 		s.log.Error("Create token error", terr)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -78,8 +78,8 @@ func SetDataToBodyInJSON(w http.ResponseWriter, data any) error {
 
 const TokenExpiredHours = 24
 
-func CreateToken(login string) (string, error) {
-	secretKey := []byte("FILATIK_SECRET_KEY_FOR_TOKEN")
+func CreateToken(login string, secret string) (string, error) {
+	secretKey := []byte(secret)
 
 	claims := jwt.MapClaims{
 		"exp": time.Now().Add(time.Hour * TokenExpiredHours).Unix(),
