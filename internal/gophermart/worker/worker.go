@@ -7,31 +7,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
+	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server/models"
 	"github.com/go-resty/resty/v2"
 )
 
 const (
 	workerChannelLimit = 10
 )
-
-type OrderStatus string
-
-const (
-	OrderStatusRegistred         OrderStatus = "REGISTERED"
-	OrderStatusInvalidProcessing OrderStatus = "INVALID"
-	OrderStatusProcessing        OrderStatus = "PROCESSING"
-	OrderStatusProcessed         OrderStatus = "PROCESSED"
-)
-
-type OrderResponse struct {
-	Order   string      `json:"order"`
-	Status  OrderStatus `json:"status"`
-	Accrual float64     `json:"accrual,omitempty"`
-}
 
 type Worker struct {
 	ordRep   repository.IOrderRepository
@@ -106,7 +92,7 @@ func (w *Worker) Processing(number int) {
 		data := resp.Body()
 		w.log.Info("Result", "body", data)
 
-		var resporder OrderResponse
+		var resporder models.OrderResponse
 		// Декодируем JSON в структуру
 		err := json.Unmarshal(data, &resporder)
 		if err != nil {
@@ -125,12 +111,12 @@ func (w *Worker) Processing(number int) {
 		}
 
 		switch resporder.Status {
-		case OrderStatusProcessing:
-			order.Status = models.UserOrderStatusProcessing
-		case OrderStatusProcessed:
-			order.Status = models.UserOrderStatusProcessed
-		case OrderStatusInvalidProcessing:
-			order.Status = models.UserOrderStatusInvalid
+		case models.OrderStatusProcessing:
+			order.Status = dbModels.UserOrderStatusProcessing
+		case models.OrderStatusProcessed:
+			order.Status = dbModels.UserOrderStatusProcessed
+		case models.OrderStatusInvalidProcessing:
+			order.Status = dbModels.UserOrderStatusInvalid
 		default:
 			continue
 		}
@@ -142,7 +128,7 @@ func (w *Worker) Processing(number int) {
 			continue
 		}
 
-		if order.Status == models.UserOrderStatusProcessed {
+		if order.Status == dbModels.UserOrderStatusProcessed {
 			user, usErr := w.useRep.GetByID(order.UserID)
 			if usErr != nil {
 				w.log.Error("Get user info error.", usErr)
