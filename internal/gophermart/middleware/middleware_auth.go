@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -22,7 +22,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		tokenString := cookie.Value
 
-		token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
@@ -34,8 +34,13 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {
-			ctx := server.SetStringToContext(r.Context(), server.ContextKeyUserLogin, claims.Subject)
+		if claims, ok := token.Claims.(*jwt.MapClaims); ok && token.Valid {
+			subject, sErr := claims.GetSubject()
+			if sErr != nil {
+				http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+				return
+			}
+			ctx := server.SetStringToContext(r.Context(), server.ContextKeyUserLogin, subject)
 			r = r.WithContext(ctx)
 		} else {
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)

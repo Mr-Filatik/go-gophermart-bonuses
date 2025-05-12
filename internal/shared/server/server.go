@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func ValidateRequestMethod(w http.ResponseWriter, log logger.Logger, current string, allowed ...string) bool {
@@ -81,10 +81,10 @@ const TokenExpiredHours = 24
 func CreateToken(login string) (string, error) {
 	secretKey := []byte("FILATIK_SECRET_KEY_FOR_TOKEN")
 
-	claims := &jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Hour * TokenExpiredHours).Unix(),
-		Issuer:    "gophermart-bonuces.gophermart",
-		Subject:   login,
+	claims := jwt.MapClaims{
+		"exp": time.Now().Add(time.Hour * TokenExpiredHours).Unix(),
+		"iss": "gophermart-bonuces.gophermart",
+		"sub": login,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

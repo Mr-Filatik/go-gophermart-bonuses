@@ -3,9 +3,9 @@ module github.com/Mr-Filatik/go-gophermart-bonuses
 go 1.23.2
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-resty/resty/v2 v2.16.5
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/pressly/goose/v3 v3.24.2
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.36.0
