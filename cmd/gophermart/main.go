@@ -7,6 +7,7 @@ import (
 	withdrawalRepository "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository/withdrawal"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/server"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/service"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/worker"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/database/connector"
 	logger "github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger/zap/sugar"
 )
@@ -31,7 +32,11 @@ func main() {
 	orderRep := orderRepository.New(conn, log)
 	wdrwlsRep := withdrawalRepository.New(conn, log)
 
-	srvc := service.New(userRep, orderRep, wdrwlsRep, log)
+	wrkr := worker.New(orderRep, userRep, conf.AccuralSystemAddress, log)
+	wrkr.Run()
+	defer wrkr.Close()
+
+	srvc := service.New(userRep, orderRep, wdrwlsRep, wrkr, log)
 
 	serv := server.New(srvc, log)
 	serv.Start(conf.RunAddress)

@@ -80,3 +80,22 @@ func (r *OrderRepository) GetAllByUserID(userID uint64) ([]models.UserOrder, err
 
 	return users, nil
 }
+
+func (r *OrderRepository) Update(item *models.UserOrder) error {
+	r.log.Debug(
+		"OrderRepository.Update() was called.",
+		"order_number", item.Number,
+		"accrual", item.Accrual,
+		"status", item.Status,
+	)
+
+	conn := r.connector.GetDB()
+
+	result := conn.Save(&item)
+	if result.Error != nil {
+		r.log.Error("OrderRepository.Update error.", result.Error, "number", item.Number)
+		return errors.New(result.Error.Error())
+	}
+
+	return nil
+}

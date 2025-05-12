@@ -2,7 +2,6 @@ package worker
 
 import (
 	"strings"
-	"time"
 
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/repository"
@@ -72,7 +71,7 @@ func (w *Worker) Processing(number int) {
 			continue
 		}
 
-		time.Sleep(time.Second)
+		// time.Sleep(time.Second)
 
 		goods, gErr := w.goodRep.GetAllByOrderID(order.ID)
 		if gErr != nil {
@@ -101,7 +100,7 @@ func (w *Worker) Processing(number int) {
 			}
 		}
 
-		time.Sleep(time.Second)
+		// time.Sleep(time.Second)
 
 		accrual := uint64(0)
 		for gi := range goods {

@@ -7,6 +7,7 @@ import (
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/worker"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 )
@@ -25,17 +26,20 @@ type Service struct {
 	orderRep  repository.IOrderRepository
 	wthrwlRep repository.IWithdrawalRepository
 	log       logger.Logger
+	worker    *worker.Worker
 }
 
 func New(
 	userRep repository.IUserRepository,
 	orderRep repository.IOrderRepository,
 	wthrwlRep repository.IWithdrawalRepository,
+	worker *worker.Worker,
 	log logger.Logger) *Service {
 	srv := Service{
 		userRep:   userRep,
 		orderRep:  orderRep,
 		wthrwlRep: wthrwlRep,
+		worker:    worker,
 		log:       log,
 	}
 
@@ -145,12 +149,21 @@ func (s *Service) UserOrdersCreate(login string, number string) error {
 			if cerr != nil {
 				return errors.New(cerr.Error())
 			}
+
+			s.worker.AddTask(num)
+
 			return nil
 		}
 		return errors.New(err.Error())
 	}
 
-	if order.User.Login == login {
+	// autoload user entity
+	user, usErr := s.userRep.GetByID(order.UserID)
+	if usErr != nil {
+		return errors.New(usErr.Error())
+	}
+
+	if user.Login == login {
 		return ErrAlreadyUploadThisUser
 	} else {
 		return ErrAlreadyUploadOtherUser
@@ -180,7 +193,11 @@ func (s *Service) UserBalanceWithdraw(data models.UserBalanceWithdrawRequest, lo
 
 	sum := helper.ConvertPriceToUint64(data.Sum)
 
-	if ok := helper.ValidateAlgorithmLuhn(sum); !ok {
+	num, perr := strconv.ParseUint(data.Order, 10, 64)
+	if perr != nil {
+		return errors.New(perr.Error())
+	}
+	if ok := helper.ValidateAlgorithmLuhn(num); !ok {
 		return ErrInvalidOrderNumber
 	}
 
@@ -233,7 +250,7 @@ func (s *Service) UserWithdrawalsGet(login string) ([]models.UserWithdraw, error
 	results := make([]models.UserWithdraw, len(withdrawals))
 	for i, item := range withdrawals {
 		results[i] = models.UserWithdraw{
-			Number:      item.Order,
+			Order:       item.Order,
 			Sum:         helper.ConvertPriceToFloat64(item.Sum),
 			ProcessedAt: item.ProcessedAt, // .Format(time.RFC3339)
 		}

@@ -40,6 +40,6 @@ type UserBalanceWithdrawRequest struct {
 
 type UserWithdraw struct {
 	ProcessedAt time.Time `json:"processed_at"`
-	Number      string    `json:"number"`
+	Order       string    `json:"order"`
 	Sum         float64   `json:"sum"`
 }
