@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
+	accrualModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/server/models"
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/repository"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
-	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server/models"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -92,7 +92,7 @@ func (w *Worker) Processing(number int) {
 		data := resp.Body()
 		w.log.Info("Result", "body", data)
 
-		var resporder models.OrderResponse
+		var resporder accrualModels.OrderResponse
 		// Декодируем JSON в структуру
 		err := json.Unmarshal(data, &resporder)
 		if err != nil {
@@ -111,11 +111,11 @@ func (w *Worker) Processing(number int) {
 		}
 
 		switch resporder.Status {
-		case models.OrderStatusProcessing:
+		case accrualModels.OrderStatusProcessing:
 			order.Status = dbModels.UserOrderStatusProcessing
-		case models.OrderStatusProcessed:
+		case accrualModels.OrderStatusProcessed:
 			order.Status = dbModels.UserOrderStatusProcessed
-		case models.OrderStatusInvalidProcessing:
+		case accrualModels.OrderStatusInvalidProcessing:
 			order.Status = dbModels.UserOrderStatusInvalid
 		default:
 			continue

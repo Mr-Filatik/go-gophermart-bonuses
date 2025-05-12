@@ -10,7 +10,6 @@ import (
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/worker"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
-	sharedModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server/models"
 )
 
 var (
@@ -45,25 +44,25 @@ func New(
 	return &srv
 }
 
-func (s *Service) OrderGet(number string) (sharedModels.OrderResponse, error) {
+func (s *Service) OrderGet(number string) (models.OrderResponse, error) {
 	s.log.Debug("Service.OrderCreate() was called.", "number", number)
 
 	num, err := strconv.ParseUint(number, 10, 64)
 	if err != nil {
-		return sharedModels.OrderResponse{}, errors.New(err.Error())
+		return models.OrderResponse{}, errors.New(err.Error())
 	}
 
 	order, gerr := s.ordRep.GetByNumber(num)
 	if gerr != nil {
 		if errors.Is(gerr, repository.ErrEntityNotFound) {
-			return sharedModels.OrderResponse{}, ErrEntityNotFound
+			return models.OrderResponse{}, ErrEntityNotFound
 		}
-		return sharedModels.OrderResponse{}, errors.New(gerr.Error())
+		return models.OrderResponse{}, errors.New(gerr.Error())
 	}
 
-	return sharedModels.OrderResponse{
+	return models.OrderResponse{
 		Order:   strconv.FormatUint(order.Number, 10),
-		Status:  sharedModels.OrderStatus(order.Status),
+		Status:  models.OrderStatus(order.Status),
 		Accrual: helper.ConvertPriceToFloat64(order.Accrual),
 	}, nil
 }
