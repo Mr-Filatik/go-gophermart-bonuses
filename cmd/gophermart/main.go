@@ -12,8 +12,6 @@ import (
 	logger "github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger/zap/sugar"
 )
 
-const workerPoolCount = 10
-
 func main() {
 	log := logger.New(logger.LevelDebug)
 	defer log.Close()
@@ -35,7 +33,7 @@ func main() {
 	wdrwlsRep := withdrawalRepository.New(conn, log)
 
 	wrkr := worker.New(orderRep, userRep, conf.AccuralSystemAddress, log)
-	wrkr.Run(workerPoolCount)
+	wrkr.Run(conf.WorkerPoolCount)
 	defer wrkr.Close()
 
 	srvc := service.New(userRep, orderRep, wdrwlsRep, wrkr, log)

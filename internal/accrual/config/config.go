@@ -14,19 +14,22 @@ const (
 	EnvNameDatabaseURI = config.EnvNameDatabaseURI
 
 	// Default values.
-	defaultValueRunAddress  string = "localhost:8081"
-	defaultValueDatabaseURI string = "postgres://user:password@host:port/database"
+	defaultValueRunAddress      string = "localhost:8081"
+	defaultValueDatabaseURI     string = "postgres://user:password@host:port/database"
+	defaultValueWorkerPoolCount int    = 10
 )
 
 type Config struct {
-	RunAddress  string
-	DatabaseURI string
+	RunAddress      string
+	DatabaseURI     string
+	WorkerPoolCount int
 }
 
 func Initialize() *Config {
 	conf := Config{
-		RunAddress:  defaultValueRunAddress,
-		DatabaseURI: defaultValueDatabaseURI,
+		RunAddress:      defaultValueRunAddress,
+		DatabaseURI:     defaultValueDatabaseURI,
+		WorkerPoolCount: defaultValueWorkerPoolCount,
 	}
 
 	conf.getFlags()

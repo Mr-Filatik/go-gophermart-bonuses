@@ -15,15 +15,17 @@ const (
 	EnvNameAccuralAddress EnvName = "ACCRUAL_SYSTEM_ADDRESS"
 
 	// Default values.
-	defaultValueRunAddress     string = "localhost:8080"
-	defaultValueDatabaseURI    string = "postgres://user:password@host:port/database"
-	defaultValueAccuralAddress string = "localhost:8081"
+	defaultValueRunAddress      string = "localhost:8080"
+	defaultValueDatabaseURI     string = "postgres://user:password@host:port/database"
+	defaultValueAccuralAddress  string = "localhost:8081"
+	defaultValueWorkerPoolCount int    = 10
 )
 
 type Config struct {
 	RunAddress           string
 	DatabaseURI          string
 	AccuralSystemAddress string
+	WorkerPoolCount      int
 }
 
 func Initialize() *Config {
@@ -31,6 +33,7 @@ func Initialize() *Config {
 		RunAddress:           defaultValueRunAddress,
 		DatabaseURI:          defaultValueDatabaseURI,
 		AccuralSystemAddress: defaultValueAccuralAddress,
+		WorkerPoolCount:      defaultValueWorkerPoolCount,
 	}
 
 	conf.getFlags()
