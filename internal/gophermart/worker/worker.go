@@ -15,10 +15,6 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const (
-	workerChannelLimit = 10
-)
-
 type Worker struct {
 	ordRep   repository.IOrderRepository
 	useRep   repository.IUserRepository
@@ -45,10 +41,10 @@ func New(
 	return &srv
 }
 
-func (w *Worker) Run() {
-	w.jobs = make(chan uint64, workerChannelLimit)
+func (w *Worker) Run(poolCount int) {
+	w.jobs = make(chan uint64, poolCount)
 
-	for i := 1; i <= workerChannelLimit; i++ {
+	for i := 1; i <= poolCount; i++ {
 		go w.Processing(i)
 	}
 }

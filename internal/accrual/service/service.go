@@ -7,9 +7,9 @@ import (
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/models"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/database/repository"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/server/models"
-	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/worker"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/helper"
 	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/worker"
 )
 
 var (
@@ -22,15 +22,15 @@ type Service struct {
 	goodRep repository.IGoodRepository
 	rulRep  repository.IRuleRepository
 	log     logger.Logger
-	worker  *worker.Worker
+	worker  worker.IWorker[uint64]
 }
 
 func New(
 	ordRep repository.IOrderRepository,
 	goodRep repository.IGoodRepository,
 	rulRep repository.IRuleRepository,
-	log logger.Logger,
-	worker *worker.Worker) *Service {
+	worker worker.IWorker[uint64],
+	log logger.Logger) *Service {
 	srv := Service{
 		ordRep:  ordRep,
 		goodRep: goodRep,

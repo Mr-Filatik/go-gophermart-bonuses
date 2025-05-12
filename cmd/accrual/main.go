@@ -12,6 +12,8 @@ import (
 	logger "github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger/zap/sugar"
 )
 
+const workerPoolCount = 10
+
 func main() {
 	log := logger.New(logger.LevelDebug)
 	defer log.Close()
@@ -33,10 +35,10 @@ func main() {
 	ruleRep := ruleRepository.New(conn, log)
 
 	wrkr := worker.New(orderRep, goodRep, ruleRep, log)
-	wrkr.Run()
+	wrkr.Run(workerPoolCount)
 	defer wrkr.Close()
 
-	srvc := service.New(orderRep, goodRep, ruleRep, log, wrkr)
+	srvc := service.New(orderRep, goodRep, ruleRep, wrkr, log)
 
 	serv := server.New(srvc, log)
 	serv.Start(conf.RunAddress)
