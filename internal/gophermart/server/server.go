@@ -48,16 +48,16 @@ func (s *Server) registerHandlers() {
 	s.router.Handle("/api/user/login", http.HandlerFunc(s.UserLogin))
 	s.router.Handle(
 		"/api/user/orders",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserOrders)))
+		middleware.AuthMiddleware(http.HandlerFunc(s.UserOrders), s.secret))
 	s.router.Handle(
 		"/api/user/balance",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserBalance)))
+		middleware.AuthMiddleware(http.HandlerFunc(s.UserBalance), s.secret))
 	s.router.Handle(
 		"/api/user/balance/withdraw",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserBalanceWithdraw)))
+		middleware.AuthMiddleware(http.HandlerFunc(s.UserBalanceWithdraw), s.secret))
 	s.router.Handle(
 		"/api/user/withdrawals",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserWithdrawals)))
+		middleware.AuthMiddleware(http.HandlerFunc(s.UserWithdrawals), s.secret))
 }
 
 func (s *Server) Start(addr string) {

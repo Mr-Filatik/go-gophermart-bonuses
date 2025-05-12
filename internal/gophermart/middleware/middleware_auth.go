@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func AuthMiddleware(next http.Handler) http.Handler {
+func AuthMiddleware(next http.Handler, secretKey string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("auth_token")
 		if err != nil {
@@ -26,7 +26,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
-			return []byte("FILATIK_SECRET_KEY_FOR_TOKEN"), nil
+			return []byte(secretKey), nil
 		})
 
 		if err != nil || !token.Valid {
