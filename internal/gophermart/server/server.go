@@ -44,20 +44,22 @@ func New(srvc *service.Service, secret string, log logger.Logger) *Server {
 }
 
 func (s *Server) registerHandlers() {
-	s.router.Handle("/api/user/register", http.HandlerFunc(s.UserRegister))
-	s.router.Handle("/api/user/login", http.HandlerFunc(s.UserLogin))
-	s.router.Handle(
-		"/api/user/orders",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserOrders), s.secret))
-	s.router.Handle(
-		"/api/user/balance",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserBalance), s.secret))
-	s.router.Handle(
-		"/api/user/balance/withdraw",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserBalanceWithdraw), s.secret))
-	s.router.Handle(
-		"/api/user/withdrawals",
-		middleware.AuthMiddleware(http.HandlerFunc(s.UserWithdrawals), s.secret))
+	s.router.Group(func(r chi.Router) {
+		r.Post("/api/user/register", s.UserRegister)
+		r.Post("/api/user/login", s.UserLogin)
+	})
+
+	s.router.Group(func(r chi.Router) {
+		r.Use(middleware.AuthMiddlewareFactory(s.secret))
+
+		r.Route("/api/user/orders", func(r chi.Router) {
+			r.Get("/", s.UserOrders)
+			r.Post("/", s.UserOrders)
+		})
+		r.Get("/api/user/balance", s.UserBalance)
+		r.Post("/api/user/balance/withdraw", s.UserBalanceWithdraw)
+		r.Get("/api/user/withdrawals", s.UserWithdrawals)
+	})
 }
 
 func (s *Server) Start(addr string) {
@@ -72,11 +74,6 @@ func (s *Server) Start(addr string) {
 }
 
 func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodPost)
-	if !ok {
-		return
-	}
-
 	data, err := server.GetDataFromBodyInJSON[models.UserRegisterRequest](r)
 	if err != nil {
 		s.log.Error(MessageErrGetDataFromBody, err)
@@ -116,11 +113,6 @@ func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodPost)
-	if !ok {
-		return
-	}
-
 	data, err := server.GetDataFromBodyInJSON[models.UserLoginRequest](r)
 	if err != nil {
 		s.log.Error(MessageErrGetDataFromBody, err)
@@ -162,11 +154,6 @@ func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodPost, http.MethodGet)
-	if !ok {
-		return
-	}
-
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -229,11 +216,6 @@ func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodGet)
-	if !ok {
-		return
-	}
-
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -255,11 +237,6 @@ func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodPost)
-	if !ok {
-		return
-	}
-
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -295,11 +272,6 @@ func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodGet)
-	if !ok {
-		return
-	}
-
 	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
 	if !ok || login == "" {
 		w.WriteHeader(http.StatusUnauthorized)

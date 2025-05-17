@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
-	"strings"
 
 	accrualModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/accrual/server/models"
 	dbModels "github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/database/models"
@@ -59,12 +60,19 @@ func (w *Worker) Processing(number int) {
 		w.log.Info("Run worker processed", "number", number)
 
 		// request to accrual
-		var address string
-		if strings.Contains(w.endpoint, "http") {
-			address = w.endpoint + "/api/orders/" + strconv.FormatUint(value, 10)
-		} else {
-			address = "http://" + w.endpoint + "/api/orders/" + strconv.FormatUint(value, 10)
+		parsed, perr := url.Parse(w.endpoint)
+		if perr != nil {
+			w.log.Error("Url parse error.", perr)
+			continue
 		}
+
+		if parsed.Scheme == "" {
+			parsed.Scheme = "http"
+			parsed.Host = parsed.Path
+			parsed.Path = ""
+		}
+
+		parsed.Path = path.Join("api", "orders", strconv.FormatUint(value, 10))
 
 		client := resty.New()
 		resp, rerr := client.R().
@@ -72,7 +80,7 @@ func (w *Worker) Processing(number int) {
 			// SetHeader(ContentEncodingHeader, EncodingType).
 			// SetHeader(AcceptEncodingHeader, EncodingType).
 			// SetBody(dat).
-			Get(address)
+			Get(parsed.String())
 
 		if rerr != nil {
 			// log.Error("Response error", rerr)

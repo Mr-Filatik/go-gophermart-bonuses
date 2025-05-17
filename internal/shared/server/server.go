@@ -5,32 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-func ValidateRequestMethod(w http.ResponseWriter, log logger.Logger, current string, allowed ...string) bool {
-	for _, method := range allowed {
-		if current == method {
-			return true
-		}
-	}
-
-	log.Error(
-		"Invalid request method",
-		errors.New("invalid request method"),
-		"actual", current,
-		"allowed", allowed,
-	)
-
-	errorMessage := fmt.Sprintf("Invalid request method. Expected one of: %v.", allowed)
-	http.Error(w, errorMessage, http.StatusMethodNotAllowed)
-	return false
-}
 
 var (
 	ErrInvalidRequestFormat = errors.New("invalid request format")

@@ -40,9 +40,9 @@ func New(srvc *service.Service, log logger.Logger) *Server {
 }
 
 func (s *Server) registerHandlers() {
-	s.router.Handle("/api/orders/{number}", http.HandlerFunc(s.OrderNumber))
-	s.router.Handle("/api/orders", http.HandlerFunc(s.Orders))
-	s.router.Handle("/api/goods", http.HandlerFunc(s.Goods))
+	s.router.Get("/api/orders/{number}", s.OrderNumber)
+	s.router.Post("/api/orders", s.Orders)
+	s.router.Post("/api/goods", s.Goods)
 }
 
 func (s *Server) Start(addr string) {
@@ -57,11 +57,6 @@ func (s *Server) Start(addr string) {
 }
 
 func (s *Server) OrderNumber(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodGet)
-	if !ok {
-		return
-	}
-
 	if !s.limiter.Allow() {
 		w.WriteHeader(http.StatusTooManyRequests)
 		return
@@ -87,11 +82,6 @@ func (s *Server) OrderNumber(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Orders(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodPost)
-	if !ok {
-		return
-	}
-
 	data, err := server.GetDataFromBodyInJSON[models.OrderRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
@@ -118,11 +108,6 @@ func (s *Server) Orders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Goods(w http.ResponseWriter, r *http.Request) {
-	ok := server.ValidateRequestMethod(w, s.log, r.Method, http.MethodPost)
-	if !ok {
-		return
-	}
-
 	data, err := server.GetDataFromBodyInJSON[models.GoodRequest](r)
 	if err != nil {
 		s.log.Error("Error get data from body", err)
