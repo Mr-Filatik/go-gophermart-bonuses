@@ -1,0 +1,298 @@
+package server
+
+import (
+	"errors"
+	"net/http"
+	"regexp"
+	"time"
+
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/middleware"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/server/models"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/gophermart/service"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/logger"
+	"github.com/Mr-Filatik/go-gophermart-bonuses/internal/shared/server"
+	"github.com/go-chi/chi/v5"
+)
+
+var (
+	ErrLoginNotFoundInContext = errors.New("not login in context")
+
+	MessageErrGetDataFromContext = "Get data from context error"
+	MessageErrGetDataFromBody    = "Get data from body error"
+)
+
+type Server struct {
+	router  *chi.Mux
+	service *service.Service
+	log     logger.Logger
+	secret  string
+}
+
+func New(srvc *service.Service, secret string, log logger.Logger) *Server {
+	srv := Server{
+		router:  chi.NewRouter(),
+		service: srvc,
+		log:     log,
+		secret:  secret,
+	}
+
+	srv.registerHandlers()
+
+	log.Info("Server created")
+
+	return &srv
+}
+
+func (s *Server) registerHandlers() {
+	s.router.Group(func(r chi.Router) {
+		r.Post("/api/user/register", s.UserRegister)
+		r.Post("/api/user/login", s.UserLogin)
+	})
+
+	s.router.Group(func(r chi.Router) {
+		r.Use(middleware.AuthMiddlewareFactory(s.secret))
+
+		r.Route("/api/user/orders", func(r chi.Router) {
+			r.Get("/", s.UserOrders)
+			r.Post("/", s.UserOrders)
+		})
+		r.Get("/api/user/balance", s.UserBalance)
+		r.Post("/api/user/balance/withdraw", s.UserBalanceWithdraw)
+		r.Get("/api/user/withdrawals", s.UserWithdrawals)
+	})
+}
+
+func (s *Server) Start(addr string) {
+	s.log.Info(
+		"Server starting",
+		"run address", addr,
+	)
+	err := http.ListenAndServe(addr, s.router)
+	if err != nil {
+		s.log.Error("Server work error", err)
+	}
+}
+
+func (s *Server) UserRegister(w http.ResponseWriter, r *http.Request) {
+	data, err := server.GetDataFromBodyInJSON[models.UserRegisterRequest](r)
+	if err != nil {
+		s.log.Error(MessageErrGetDataFromBody, err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if data != nil && (data.Login == "" || data.Password == "") {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = s.service.UserRegister(*data)
+	if err != nil {
+		s.log.Error("Error register user", err)
+		if errors.Is(err, service.ErrLoginAlreadyTaken) {
+			w.WriteHeader(http.StatusConflict)
+			return
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	token, terr := server.CreateToken(data.Login, s.secret)
+	if terr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Path:     "/api/user",
+		HttpOnly: true,
+		Expires:  time.Now().Add(server.TokenExpiredHours * time.Hour),
+	})
+}
+
+func (s *Server) UserLogin(w http.ResponseWriter, r *http.Request) {
+	data, err := server.GetDataFromBodyInJSON[models.UserLoginRequest](r)
+	if err != nil {
+		s.log.Error(MessageErrGetDataFromBody, err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if data != nil && (data.Login == "" || data.Password == "") {
+		s.log.Error("Data from body is empty", errors.New("body is empty"))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	lerr := s.service.UserLogin(*data)
+	if lerr != nil {
+		s.log.Error("Error login user", lerr)
+		if errors.Is(lerr, service.ErrInvalidLoginOrPassword) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	token, terr := server.CreateToken(data.Login, s.secret)
+	if terr != nil {
+		s.log.Error("Create token error", terr)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Path:     "/api/user",
+		HttpOnly: true,
+		Expires:  time.Now().Add(server.TokenExpiredHours * time.Hour),
+	})
+}
+
+func (s *Server) UserOrders(w http.ResponseWriter, r *http.Request) {
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
+	if !ok || login == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		orders, err := s.service.UserOrdersGet(login)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if len(orders) == 0 {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		serr := server.SetDataToBodyInJSON(w, orders)
+		if serr != nil {
+			http.Error(w, serr.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if r.Method == http.MethodPost {
+		data, err := server.GetStringFromBody(r)
+		if err != nil {
+			s.log.Error(MessageErrGetDataFromBody, err)
+			http.Error(w, err.Error(), http.StatusBadRequest) // dont used
+			return
+		}
+
+		s.log.Info("Data", "data", data)
+		ok, _ := regexp.MatchString(`^\d+$`, data)
+		if !ok {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		cerr := s.service.UserOrdersCreate(login, data)
+		if cerr != nil {
+			s.log.Error("Error create order", cerr)
+			switch {
+			case errors.Is(cerr, service.ErrInvalidOrderNumber):
+				w.WriteHeader(http.StatusUnprocessableEntity)
+			case errors.Is(cerr, service.ErrAlreadyUploadThisUser):
+				w.WriteHeader(http.StatusOK)
+			case errors.Is(cerr, service.ErrAlreadyUploadOtherUser):
+				http.Error(w, cerr.Error(), http.StatusConflict)
+			default:
+				http.Error(w, cerr.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+	}
+}
+
+func (s *Server) UserBalance(w http.ResponseWriter, r *http.Request) {
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
+	if !ok || login == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
+		return
+	}
+
+	balance, err := s.service.UserBalanceGet(login)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	serr := server.SetDataToBodyInJSON(w, balance)
+	if serr != nil {
+		http.Error(w, serr.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *Server) UserBalanceWithdraw(w http.ResponseWriter, r *http.Request) {
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
+	if !ok || login == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
+		return
+	}
+
+	data, err := server.GetDataFromBodyInJSON[models.UserBalanceWithdrawRequest](r)
+	if err != nil {
+		s.log.Error(MessageErrGetDataFromBody, err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if data != nil && (data.Order == "" || data.Sum <= 0.0) {
+		http.Error(w, "data is empty", http.StatusBadRequest)
+		return
+	}
+
+	berr := s.service.UserBalanceWithdraw(*data, login)
+	if berr != nil {
+		s.log.Error("Error balance withdraw", berr)
+		switch {
+		case errors.Is(berr, service.ErrInvalidOrderNumber):
+			http.Error(w, berr.Error(), http.StatusUnprocessableEntity)
+		case errors.Is(berr, service.ErrInsufficientFunds):
+			http.Error(w, berr.Error(), http.StatusPaymentRequired)
+		default:
+			http.Error(w, berr.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+}
+
+func (s *Server) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
+	login, ok := server.GetStringFromContext(r.Context(), server.ContextKeyUserLogin)
+	if !ok || login == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		s.log.Error(MessageErrGetDataFromContext, ErrLoginNotFoundInContext)
+		return
+	}
+
+	withdrawals, err := s.service.UserWithdrawalsGet(login)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(withdrawals) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	serr := server.SetDataToBodyInJSON(w, withdrawals)
+	if serr != nil {
+		http.Error(w, serr.Error(), http.StatusInternalServerError)
+		return
+	}
+}
